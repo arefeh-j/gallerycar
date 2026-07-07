@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}
+Cars
+{% endblock %}
+
+{% block content %}
+
+<h1>Cars Management</h1>
+
+<p>
+    <a href="/cars/add">
+        ➕ Add New Car
+    </a>
+</p>
+
+{% if cars %}
+
+<table border="1" cellpadding="10" cellspacing="0">
+
+    <tr>
+        <th>ID</th>
+        <th>Brand</th>
+        <th>Model</th>
+        <th>Year</th>
+        <th>Price</th>
+        <th>Mileage</th>
+        <th>Status</th>
+        <th>Seller</th>
+        <th>Favorite</th>
+        <th>Edit</th>
+        <th>Delete</th>
+    </tr>
+
+    {% for car in cars %}
+
+    <tr>
+
+        <td>{{ car.id }}</td>
+        <td>{{ car.brand }}</td>
+        <td>{{ car.model }}</td>
+        <td>{{ car.year }}</td>
+        <td>{{ car.price }}</td>
+        <td>{{ car.mileage }}</td>
+        <td>{{ car.status }}</td>
+        <td>{{ car.seller }}</td>
+
+        <td>
+            <a href="/favorites/add/{{ car.id }}">
+                ❤️ Favorite
+            </a>
+        </td>
+
+        <td>
+            <a href="/cars/edit/{{ car.id }}">
+                ✏️ Edit
+            </a>
+        </td>
+
+        <td>
+            <a href="/cars/delete/{{ car.id }}">
+                🗑 Delete
+            </a>
+        </td>
+
+    </tr>
+
+    {% endfor %}
+
+</table>
+
+{% else %}
+
+<h3>No cars found.</h3>
+
+{% endif %}
+
+{% endblock %}

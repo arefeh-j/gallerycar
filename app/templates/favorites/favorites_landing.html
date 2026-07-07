@@ -1,47 +1,9 @@
 {% extends "base.html" %}
 
-{% block title %}
-Favorite Cars
-{% endblock %}
-
 {% block content %}
 
-<h1>Favorite Cars</h1>
+<h1 style="color:red;">Favorites Works!</h1>
 
-{% if favorites %}
-
-<table border="1" cellpadding="10">
-
-    <tr>
-        <th>Brand</th>
-        <th>Model</th>
-        <th>Year</th>
-        <th>Price</th>
-        <th>Delete</th>
-    </tr>
-
-    {% for car in favorites %}
-
-    <tr>
-        <td>{{ car.brand }}</td>
-        <td>{{ car.model }}</td>
-        <td>{{ car.year }}</td>
-        <td>{{ car.price }}</td>
-        <td>
-            <a href="/favorites/delete/{{ car.id }}">
-                Remove
-            </a>
-        </td>
-    </tr>
-
-    {% endfor %}
-
-</table>
-
-{% else %}
-
-<p>No favorite cars found.</p>
-
-{% endif %}
+<p>Hello</p>
 
 {% endblock %}

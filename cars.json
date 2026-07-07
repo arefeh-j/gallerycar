@@ -1,0 +1,12 @@
+[
+    {
+        "id": "1",
+        "brand": "BMW",
+        "model": "M4",
+        "year": 2022,
+        "price": 60000,
+        "mileage": 12000,
+        "status": "available",
+        "seller": "Ali"
+    }
+]

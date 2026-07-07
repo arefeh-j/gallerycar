@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}
+{% if editing %}
+Edit Car
+{% else %}
+Add Car
+{% endif %}
+{% endblock %}
+
+{% block content %}
+
+<h1>
+{% if editing %}
+Edit Car
+{% else %}
+Add New Car
+{% endif %}
+</h1>
+
+{% if error %}
+<p style="color:red;">
+    {{ error }}
+</p>
+{% endif %}
+
+<form method="post"
+{% if editing %}
+action="/cars/{{ car_id }}"
+{% else %}
+action="/cars/"
+{% endif %}
+>
+
+{% if not editing %}
+
+<p>
+<label>Car ID</label><br>
+<input type="text" name="id"
+value="{{ form_data.id if form_data else '' }}"
+required>
+</p>
+
+{% endif %}
+
+<p>
+<label>Brand</label><br>
+<input type="text" name="brand"
+value="{{ car.brand if car else (form_data.brand if form_data else '') }}"
+required>
+</p>
+
+<p>
+<label>Model</label><br>
+<input type="text" name="model"
+value="{{ car.model if car else (form_data.model if form_data else '') }}"
+required>
+</p>
+
+<p>
+<label>Year</label><br>
+<input type="number" name="year"
+value="{{ car.year if car else (form_data.year if form_data else '') }}"
+required>
+</p>
+
+<p>
+<label>Price</label><br>
+<input type="number" name="price"
+value="{{ car.price if car else (form_data.price if form_data else '') }}"
+required>
+</p>
+
+<p>
+<label>Mileage</label><br>
+<input type="number" name="mileage"
+value="{{ car.mileage if car else (form_data.mileage if form_data else '') }}"
+required>
+</p>
+
+<p>
+<label>Status</label><br>
+
+<select name="status">
+
+<option value="available"
+{% if car and car.status=="available" %}
+selected
+{% endif %}
+>
+Available
+</option>
+
+<option value="sold"
+{% if car and car.status=="sold" %}
+selected
+{% endif %}
+>
+Sold
+</option>
+
+</select>
+
+</p>
+
+<p>
+<label>Seller</label><br>
+<input type="text" name="seller"
+value="{{ car.seller if car else (form_data.seller if form_data else '') }}"
+required>
+</p>
+
+<p>
+
+<button type="submit">
+
+{% if editing %}
+Update Car
+{% else %}
+Add Car
+{% endif %}
+
+</button>
+
+<a href="/cars/landing">
+Cancel
+</a>
+
+</p>
+
+</form>
+
+{% endblock %}

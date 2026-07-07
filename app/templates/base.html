@@ -1,13 +1,69 @@
-<li>
-    <a href="/favorites/landing">
-        <i class="fas fa-heart"></i>
-        Favorites
-    </a>
-</li>
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Online Car Gallery{% endblock %}</title>
 
-<li>
-    <a href="/admin/landing">
-        <i class="fas fa-user-shield"></i>
-        Admin
-    </a>
-</li>
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <link rel="stylesheet" href="/static/css/custom.css">
+</head>
+
+<body>
+
+<nav class="navbar">
+    <div class="container">
+
+        <a href="/" class="navbar-brand">
+            <i class="fas fa-car"></i>
+            Online Car Gallery
+        </a>
+
+        <ul class="navbar-nav">
+
+            <li>
+                <a href="/">
+                    Dashboard
+                </a>
+            </li>
+
+            <li>
+                <a href="/cars/landing">
+                    Cars
+                </a>
+            </li>
+
+            <li>
+                <a href="/users/landing">
+                    Users
+                </a>
+            </li>
+
+            <li>
+                <a href="/favorites/landing">
+                    <i class="fas fa-heart"></i>
+                    Favorites
+                </a>
+            </li>
+
+            <li>
+                <a href="/admin/landing">
+                    <i class="fas fa-user-shield"></i>
+                    Admin
+                </a>
+            </li>
+
+        </ul>
+
+    </div>
+</nav>
+
+<main class="container">
+    {% block content %}
+    {% endblock %}
+</main>
+
+</body>
+</html>
