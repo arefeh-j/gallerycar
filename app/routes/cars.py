@@ -197,7 +197,32 @@ async def edit_car_form(request: Request, car_id: str):
             "car_id": car_id
         }
     )
+@router.get("/view/{car_id}", response_class=HTMLResponse)
+async def view_car(request: Request, car_id: str):
 
+    cars = load_cars()
+
+    car = None
+
+    for c in cars:
+        if c["id"] == car_id:
+            car = c
+            break
+
+    if car is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Car not found"
+        )
+
+    return templates.TemplateResponse(
+        request=request,
+        name="cars/car_view.html",
+        context={
+            "request": request,
+            "car": car
+        }
+)
 
 @router.post("/{car_id}")
 async def update_car(
@@ -301,4 +326,29 @@ async def delete_car(car_id: str):
     return RedirectResponse(
         "/cars/landing",
         status_code=status.HTTP_303_SEE_OTHER
+    )
+@router.get("/view/{car_id}", response_class=HTMLResponse)
+async def view_car(request: Request, car_id: str):
+
+    cars = load_cars()
+
+    car = None
+
+    for c in cars:
+        if c["id"] == car_id:
+            car = c
+            break
+
+    if car is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Car not found"
+        )
+
+    return templates.TemplateResponse(
+        request=request,
+        name="cars/car_view.html",
+        context={
+            "car": car
+        }
     )

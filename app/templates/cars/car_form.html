@@ -2,132 +2,158 @@
 
 {% block title %}
 {% if editing %}
-Edit Car
+ویرایش خودرو
 {% else %}
-Add Car
+افزودن خودرو
 {% endif %}
 {% endblock %}
 
 {% block content %}
 
 <h1>
-{% if editing %}
-Edit Car
-{% else %}
-Add New Car
-{% endif %}
+    {% if editing %}
+    ✏️ ویرایش خودرو
+    {% else %}
+    ➕ افزودن خودرو
+    {% endif %}
 </h1>
 
-{% if error %}
-<p style="color:red;">
-    {{ error }}
-</p>
-{% endif %}
+<div class="card">
 
 <form method="post"
-{% if editing %}
-action="/cars/{{ car_id }}"
-{% else %}
-action="/cars/"
+      action="{% if editing %}/cars/{{ car_id }}{% else %}/cars/{% endif %}">
+
+{% if error %}
+<div style="background:#f8d7da;color:#721c24;padding:10px;border-radius:6px;margin-bottom:15px;">
+    {{ error }}
+</div>
 {% endif %}
->
 
 {% if not editing %}
 
-<p>
-<label>Car ID</label><br>
-<input type="text" name="id"
-value="{{ form_data.id if form_data else '' }}"
-required>
-</p>
+<label>شناسه خودرو</label>
+
+<input
+    type="text"
+    name="id"
+    value="{{ form_data.id if form_data else '' }}"
+    required>
+
+{% else %}
+
+<label>شناسه خودرو</label>
+
+<input
+    type="text"
+    value="{{ car.id }}"
+    disabled>
 
 {% endif %}
 
-<p>
-<label>Brand</label><br>
-<input type="text" name="brand"
-value="{{ car.brand if car else (form_data.brand if form_data else '') }}"
-required>
-</p>
 
-<p>
-<label>Model</label><br>
-<input type="text" name="model"
-value="{{ car.model if car else (form_data.model if form_data else '') }}"
-required>
-</p>
+<label>برند</label>
 
-<p>
-<label>Year</label><br>
-<input type="number" name="year"
-value="{{ car.year if car else (form_data.year if form_data else '') }}"
-required>
-</p>
+<input
+    type="text"
+    name="brand"
+    value="{% if editing %}{{ car.brand }}{% elif form_data %}{{ form_data.brand }}{% endif %}"
+    required>
 
-<p>
-<label>Price</label><br>
-<input type="number" name="price"
-value="{{ car.price if car else (form_data.price if form_data else '') }}"
-required>
-</p>
 
-<p>
-<label>Mileage</label><br>
-<input type="number" name="mileage"
-value="{{ car.mileage if car else (form_data.mileage if form_data else '') }}"
-required>
-</p>
+<label>مدل</label>
 
-<p>
-<label>Status</label><br>
+<input
+    type="text"
+    name="model"
+    value="{% if editing %}{{ car.model }}{% elif form_data %}{{ form_data.model }}{% endif %}"
+    required>
+
+
+<label>سال تولید</label>
+
+<input
+    type="number"
+    name="year"
+    value="{% if editing %}{{ car.year }}{% elif form_data %}{{ form_data.year }}{% endif %}"
+    required>
+
+
+<label>قیمت (تومان)</label>
+
+<input
+    type="number"
+    name="price"
+    value="{% if editing %}{{ car.price }}{% elif form_data %}{{ form_data.price }}{% endif %}"
+    required>
+
+
+<label>کارکرد (km)</label>
+
+<input
+    type="number"
+    name="mileage"
+    value="{% if editing %}{{ car.mileage }}{% elif form_data %}{{ form_data.mileage }}{% endif %}"
+    required>
+
+
+<label>وضعیت</label>
 
 <select name="status">
 
 <option value="available"
-{% if car and car.status=="available" %}
+{% if editing and car.status=="available" %}
 selected
 {% endif %}
 >
-Available
+موجود
 </option>
 
 <option value="sold"
-{% if car and car.status=="sold" %}
+{% if editing and car.status=="sold" %}
 selected
 {% endif %}
 >
-Sold
+فروخته شده
 </option>
 
 </select>
 
-</p>
 
-<p>
-<label>Seller</label><br>
-<input type="text" name="seller"
-value="{{ car.seller if car else (form_data.seller if form_data else '') }}"
-required>
-</p>
+<label>فروشنده</label>
 
-<p>
+<input
+    type="text"
+    name="seller"
+    value="{% if editing %}{{ car.seller }}{% elif form_data %}{{ form_data.seller }}{% endif %}"
+    required>
 
-<button type="submit">
+
+<div style="margin-top:20px;display:flex;gap:10px;">
+
+<button class="btn btn-success" type="submit">
 
 {% if editing %}
-Update Car
+
+💾 ذخیره تغییرات
+
 {% else %}
-Add Car
+
+➕ ثبت خودرو
+
 {% endif %}
 
 </button>
 
-<a href="/cars/landing">
-Cancel
+<a href="/cars/landing" class="btn btn-secondary">
+
+↩ بازگشت
+
 </a>
 
-</p>
+</div>
 
 </form>
+
+</div>
 
 {% endblock %}

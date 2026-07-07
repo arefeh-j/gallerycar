@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}Users{% endblock %}
+
+{% block content %}
+
+<h2><i class="fas fa-users"></i> Users Management</h2>
+
+<div style="margin:1.5rem 0;">
+    <a href="/users/add" class="btn btn-primary">
+        <i class="fas fa-plus"></i>
+        Add New User
+    </a>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+
+        <form method="get" action="/users/landing" class="d-flex gap-2">
+
+            <input
+                type="text"
+                name="search"
+                value="{{ search }}"
+                placeholder="Search by Name or Email"
+                class="form-control">
+
+            <select
+                name="sort"
+                class="form-select"
+                style="width:auto;">
+
+                <option value="default">Default</option>
+
+                <option value="user_id"
+                {% if sort=="user_id" %}selected{% endif %}>
+                Sort by ID
+                </option>
+
+                <option value="name"
+                {% if sort=="name" %}selected{% endif %}>
+                Sort by Name
+                </option>
+
+                <option value="email"
+                {% if sort=="email" %}selected{% endif %}>
+                Sort by Email
+                </option>
+
+            </select>
+
+            <button class="btn btn-primary">
+                Search
+            </button>
+
+        </form>
+
+    </div>
+</div>
+
+<div class="card">
+
+<div class="card-header">
+All Users
+</div>
+
+<div class="card-body">
+
+<table class="table">
+
+<tr>
+
+<th>ID</th>
+<th>Name</th>
+<th>Email</th>
+<th>Phone</th>
+<th>Actions</th>
+
+</tr>
+
+{% for user in users %}
+
+<tr>
+
+<td>{{ user.user_id }}</td>
+
+<td>{{ user.name }}</td>
+
+<td>{{ user.email }}</td>
+
+<td>{{ user.phone }}</td>
+
+<td>
+
+<a
+class="btn btn-warning btn-sm"
+href="/users/edit/{{ user.user_id }}">
+
+Edit
+
+</a>
+
+<a
+class="btn btn-danger btn-sm"
+href="/users/delete/{{ user.user_id }}">
+
+Delete
+
+</a>
+
+</td>
+
+</tr>
+
+{% else %}
+
+<tr>
+
+<td colspan="5">
+
+No users found.
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</table>
+
+</div>
+
+</div>
+
+{% endblock %}

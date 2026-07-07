@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}
+جزئیات خودرو
+{% endblock %}
+
+{% block content %}
+
+<h1>🚗 جزئیات خودرو</h1>
+
+<div class="card">
+
+    <table>
+
+        <tr>
+            <th style="width:30%;">شناسه</th>
+            <td>{{ car.id }}</td>
+        </tr>
+
+        <tr>
+            <th>برند</th>
+            <td>{{ car.brand }}</td>
+        </tr>
+
+        <tr>
+            <th>مدل</th>
+            <td>{{ car.model }}</td>
+        </tr>
+
+        <tr>
+            <th>سال تولید</th>
+            <td>{{ car.year }}</td>
+        </tr>
+
+        <tr>
+            <th>قیمت</th>
+            <td>{{ "{:,}".format(car.price) }} تومان</td>
+        </tr>
+
+        <tr>
+            <th>کارکرد</th>
+            <td>{{ "{:,}".format(car.mileage) }} کیلومتر</td>
+        </tr>
+
+        <tr>
+            <th>وضعیت</th>
+            <td>{{ car.status }}</td>
+        </tr>
+
+        <tr>
+            <th>فروشنده</th>
+            <td>{{ car.seller }}</td>
+        </tr>
+
+    </table>
+
+    <br>
+
+    <a href="/favorites/add/{{ car.id }}" class="btn btn-primary">
+        ❤️ افزودن به علاقه‌مندی‌ها
+    </a>
+
+    <a href="/cars/edit/{{ car.id }}" class="btn btn-warning">
+        ✏️ ویرایش
+    </a>
+
+    <a href="/cars/delete/{{ car.id }}" class="btn btn-danger">
+        🗑 حذف
+    </a>
+
+    <a href="/cars/landing" class="btn btn-secondary">
+        ↩ بازگشت
+    </a>
+
+</div>
+
+{% endblock %}

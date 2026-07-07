@@ -1,78 +1,112 @@
 {% extends "base.html" %}
 
 {% block title %}
-Cars
+گالری خودرو
 {% endblock %}
 
 {% block content %}
 
-<h1>Cars Management</h1>
+<h1>🚗 داشبورد گالری خودرو</h1>
 
-<p>
-    <a href="/cars/add">
-        ➕ Add New Car
-    </a>
+<p style="margin-bottom:25px;">
+به سامانه مدیریت گالری خودرو خوش آمدید.
 </p>
 
-{% if cars %}
+<div class="stats">
 
-<table border="1" cellpadding="10" cellspacing="0">
+    <div class="stat-card">
+        <h2>{{ total_cars }}</h2>
+        <p>کل خودروها</p>
+    </div>
 
-    <tr>
-        <th>ID</th>
-        <th>Brand</th>
-        <th>Model</th>
-        <th>Year</th>
-        <th>Price</th>
-        <th>Mileage</th>
-        <th>Status</th>
-        <th>Seller</th>
-        <th>Favorite</th>
-        <th>Edit</th>
-        <th>Delete</th>
-    </tr>
+    <div class="stat-card">
+        <h2>{{ total_users }}</h2>
+        <p>کل کاربران</p>
+    </div>
 
-    {% for car in cars %}
+    <div class="stat-card">
+        <h2>{{ available_cars }}</h2>
+        <p>خودروهای موجود</p>
+    </div>
 
-    <tr>
+    <div class="stat-card">
+        <h2>{{ sold_cars }}</h2>
+        <p>خودروهای فروخته شده</p>
+    </div>
 
-        <td>{{ car.id }}</td>
-        <td>{{ car.brand }}</td>
-        <td>{{ car.model }}</td>
-        <td>{{ car.year }}</td>
-        <td>{{ car.price }}</td>
-        <td>{{ car.mileage }}</td>
-        <td>{{ car.status }}</td>
-        <td>{{ car.seller }}</td>
+    <div class="stat-card">
+        <h2>{{ brands }}</h2>
+        <p>تعداد برندها</p>
+    </div>
 
-        <td>
-            <a href="/favorites/add/{{ car.id }}">
-                ❤️ Favorite
-            </a>
-        </td>
+</div>
 
-        <td>
-            <a href="/cars/edit/{{ car.id }}">
-                ✏️ Edit
-            </a>
-        </td>
+<br>
 
-        <td>
-            <a href="/cars/delete/{{ car.id }}">
-                🗑 Delete
-            </a>
-        </td>
+<div class="card">
 
-    </tr>
+<h2>💰 ارزان‌ترین خودرو</h2>
 
-    {% endfor %}
+{% if cheapest %}
+
+<table>
+
+<tr>
+<th>برند</th>
+<td>{{ cheapest.brand }}</td>
+</tr>
+
+<tr>
+<th>مدل</th>
+<td>{{ cheapest.model }}</td>
+</tr>
+
+<tr>
+<th>قیمت</th>
+<td>{{ "{:,}".format(cheapest.price) }} تومان</td>
+</tr>
 
 </table>
 
 {% else %}
 
-<h3>No cars found.</h3>
+<p>خودرویی ثبت نشده است.</p>
 
 {% endif %}
+
+</div>
+
+<div class="card">
+
+<h2>💎 گران‌ترین خودرو</h2>
+
+{% if expensive %}
+
+<table>
+
+<tr>
+<th>برند</th>
+<td>{{ expensive.brand }}</td>
+</tr>
+
+<tr>
+<th>مدل</th>
+<td>{{ expensive.model }}</td>
+</tr>
+
+<tr>
+<th>قیمت</th>
+<td>{{ "{:,}".format(expensive.price) }} تومان</td>
+</tr>
+
+</table>
+
+{% else %}
+
+<p>خودرویی ثبت نشده است.</p>
+
+{% endif %}
+
+</div>
 
 {% endblock %}

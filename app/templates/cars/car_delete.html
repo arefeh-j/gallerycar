@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}
+حذف خودرو
+{% endblock %}
+
+{% block content %}
+
+<h1>🗑 حذف خودرو</h1>
+
+<div class="card">
+
+    <p style="font-size:18px; margin-bottom:20px;">
+        آیا از حذف این خودرو مطمئن هستید؟
+    </p>
+
+    <table>
+
+        <tr>
+            <th>برند</th>
+            <td>{{ car.brand }}</td>
+        </tr>
+
+        <tr>
+            <th>مدل</th>
+            <td>{{ car.model }}</td>
+        </tr>
+
+        <tr>
+            <th>سال</th>
+            <td>{{ car.year }}</td>
+        </tr>
+
+        <tr>
+            <th>قیمت</th>
+            <td>{{ "{:,}".format(car.price) }} تومان</td>
+        </tr>
+
+        <tr>
+            <th>کارکرد</th>
+            <td>{{ "{:,}".format(car.mileage) }} km</td>
+        </tr>
+
+        <tr>
+            <th>فروشنده</th>
+            <td>{{ car.seller }}</td>
+        </tr>
+
+    </table>
+
+    <form method="post"
+          action="/cars/delete/{{ car.id }}"
+          style="margin-top:25px;">
+
+        <button class="btn btn-danger" type="submit">
+
+            🗑 بله، حذف شود
+
+        </button>
+
+        <a href="/cars/landing" class="btn btn-secondary">
+
+            انصراف
+
+        </a>
+
+    </form>
+
+</div>
+
+{% endblock %}
