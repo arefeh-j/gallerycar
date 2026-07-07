@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Request
+from app.routes.favorites import router as favorites_router
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
@@ -34,6 +35,7 @@ app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 app.include_router(cars_router, prefix="/cars")
 app.include_router(users_router, prefix="/users")
+app.include_router(favorites_router, prefix="/favorites")
 
 templates = Jinja2Templates(directory="app/templates")
 
