@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}
+Online Car Gallery
+{% endblock %}
+
+{% block content %}
+
+<h1 style="text-align:center;">
+    🚗 Online Car Gallery Dashboard
+</h1>
+
+<hr>
+
+<div class="dashboard">
+
+    <div class="card">
+        <h3>Total Cars</h3>
+        <h1>{{ total_cars }}</h1>
+    </div>
+
+    <div class="card">
+        <h3>Available Cars</h3>
+        <h1>{{ available_cars }}</h1>
+    </div>
+
+    <div class="card">
+        <h3>Sold Cars</h3>
+        <h1>{{ sold_cars }}</h1>
+    </div>
+
+    <div class="card">
+        <h3>Total Users</h3>
+        <h1>{{ total_users }}</h1>
+    </div>
+
+    <div class="card">
+        <h3>Car Brands</h3>
+        <h1>{{ brands }}</h1>
+    </div>
+
+</div>
+
+<br>
+
+<div class="info-container">
+
+    <div class="info-box">
+
+        <h2>💰 Cheapest Car</h2>
+
+        {% if cheapest %}
+
+        <p><b>Brand:</b> {{ cheapest.brand }}</p>
+
+        <p><b>Model:</b> {{ cheapest.model }}</p>
+
+        <p><b>Year:</b> {{ cheapest.year }}</p>
+
+        <p><b>Price:</b> {{ cheapest.price }}</p>
+
+        {% else %}
+
+        <p>No car found.</p>
+
+        {% endif %}
+
+    </div>
+
+    <div class="info-box">
+
+        <h2>🏎️ Most Expensive Car</h2>
+
+        {% if expensive %}
+
+        <p><b>Brand:</b> {{ expensive.brand }}</p>
+
+        <p><b>Model:</b> {{ expensive.model }}</p>
+
+        <p><b>Year:</b> {{ expensive.year }}</p>
+
+        <p><b>Price:</b> {{ expensive.price }}</p>
+
+        {% else %}
+
+        <p>No car found.</p>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+<br>
+
+<div style="text-align:center;">
+
+    <a href="/cars/landing">
+        <button>🚗 Manage Cars</button>
+    </a>
+
+    <a href="/users/landing">
+        <button>👤 Manage Users</button>
+    </a>
+
+</div>
+
+{% endblock %}
