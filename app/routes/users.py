@@ -1,104 +1,72 @@
-from fastapi import APIRouter, Request, Query
+from fastapi import APIRouter, Request, Query, Depends, Form, status, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
-from fastapi import Form, status, HTTPException
-import json
-import os
+
+from sqlalchemy.orm import Session
+from sqlalchemy import or_
 import math
 
+from app.database import get_db
+from app.models.user import User
+
 router = APIRouter()
+
 templates = Jinja2Templates(directory="app/templates")
 
-USERS_FILE = "users.json"
 ITEMS_PER_PAGE = 5
-
-
-def load_users():
-    if not os.path.exists(USERS_FILE):
-        return []
-
-    with open(USERS_FILE, "r", encoding="utf-8") as f:
-        return json.load(f)
-
-
-def save_users(users):
-    with open(USERS_FILE, "w", encoding="utf-8") as f:
-        json.dump(users, f, indent=4)
-
-
-def next_user_id(users):
-
-    if not users:
-        return "U001"
-
-    max_num = max(int(u["user_id"][1:]) for u in users)
-
-    return f"U{max_num+1:03d}"
-
-
 @router.get("/landing", response_class=HTMLResponse)
 async def users_landing(
-
     request: Request,
-
-    sort: str = Query(
-        "default",
-        pattern="^(default|user_id|name|email)$"
-    ),
-
+    db: Session = Depends(get_db),
+    sort: str = Query("default"),
     page: int = Query(1, ge=1),
-
-    search: str = Query(None)
-
+    search: str = Query("")
 ):
 
-    users = load_users()
+    query = db.query(User)
 
     if search:
 
-        search_lower = search.lower()
+        query = query.filter(
+            or_(
+                User.full_name.ilike(f"%{search}%"),
+                User.email.ilike(f"%{search}%"),
+                User.phone.ilike(f"%{search}%")
+            )
+        )
 
-        filtered = []
+    if sort == "name":
 
-        for user in users:
-
-            if (
-                search_lower in user["user_id"].lower()
-                or search_lower in user["name"].lower()
-                or search_lower in user["email"].lower()
-            ):
-                filtered.append(user)
-
-        users = filtered
-
-    if sort == "user_id":
-        users = sorted(users, key=lambda x: x["user_id"])
-
-    elif sort == "name":
-        users = sorted(users, key=lambda x: x["name"].lower())
+        query = query.order_by(User.full_name)
 
     elif sort == "email":
-        users = sorted(users, key=lambda x: x["email"].lower())
 
-    total_items = len(users)
+        query = query.order_by(User.email)
+
+    else:
+
+        query = query.order_by(User.id)
+
+    total_items = query.count()
 
     total_pages = math.ceil(total_items / ITEMS_PER_PAGE)
 
-    start = (page - 1) * ITEMS_PER_PAGE
-    end = start + ITEMS_PER_PAGE
-
-    paginated_users = users[start:end]
+    users = query.offset(
+        (page - 1) * ITEMS_PER_PAGE
+    ).limit(
+        ITEMS_PER_PAGE
+    ).all()
 
     return templates.TemplateResponse(
         request=request,
         name="users/users_landing.html",
         context={
-            "users": paginated_users,
+            "users": users,
             "total_items": total_items,
             "current_page": page,
             "total_pages": total_pages,
             "sort": sort,
-            "search": search or "",
+            "search": search
         }
     )
 # ==========================
@@ -113,16 +81,17 @@ async def add_user_form(request: Request):
         name="users/user_form.html",
         context={
             "editing": False,
-            "user": None,
-            "user_id": None
+            "user": None
         }
     )
 
 
-@router.post("/", response_class=HTMLResponse)
+@router.post("/")
 async def create_user(
 
     request: Request,
+
+    db: Session = Depends(get_db),
 
     name: str = Form(...),
 
@@ -134,64 +103,58 @@ async def create_user(
 
 ):
 
-    users = load_users()
+    old_user = db.query(User).filter(User.email == email).first()
 
-    # جلوگیری از ثبت ایمیل تکراری
-    for user in users:
+    if old_user:
 
-        if user["email"] == email:
+        return templates.TemplateResponse(
+            request=request,
+            name="users/user_form.html",
+            context={
+                "editing": False,
+                "user": None,
+                "error": "This email already exists."
+            },
+            status_code=status.HTTP_400_BAD_REQUEST
+        )
 
-            return templates.TemplateResponse(
-                request=request,
-                name="users/user_form.html",
-                context={
-                    "editing": False,
-                    "user": None,
-                    "user_id": None,
-                    "error": "This email already exists."
-                },
-                status_code=status.HTTP_400_BAD_REQUEST
-            )
+    new_user = User(
+        full_name=name,
+        email=email,
+        phone=phone,
+        password=password,
+        role="user"
+    )
 
-    new_user = {
+    db.add(new_user)
 
-        "user_id": next_user_id(users),
-
-        "name": name,
-
-        "email": email,
-
-        "phone": phone,
-
-        "password": password
-
-    }
-
-    users.append(new_user)
-
-    save_users(users)
+    db.commit()
 
     return RedirectResponse(
         "/users/landing",
         status_code=status.HTTP_303_SEE_OTHER
     )
+
+
 # ==========================
 # Edit User
 # ==========================
 
 @router.get("/edit/{user_id}", response_class=HTMLResponse)
-async def edit_user_form(request: Request, user_id: str):
+async def edit_user_form(
 
-    users = load_users()
+    request: Request,
 
-    user = None
+    user_id: int,
 
-    for u in users:
-        if u["user_id"] == user_id:
-            user = u
-            break
+    db: Session = Depends(get_db)
+
+):
+
+    user = db.query(User).filter(User.id == user_id).first()
 
     if user is None:
+
         raise HTTPException(
             status_code=404,
             detail="User not found"
@@ -202,8 +165,7 @@ async def edit_user_form(request: Request, user_id: str):
         name="users/user_form.html",
         context={
             "editing": True,
-            "user": user,
-            "user_id": user_id
+            "user": user
         }
     )
 
@@ -211,7 +173,9 @@ async def edit_user_form(request: Request, user_id: str):
 @router.post("/{user_id}")
 async def update_user(
 
-    user_id: str,
+    user_id: int,
+
+    db: Session = Depends(get_db),
 
     name: str = Form(...),
 
@@ -223,54 +187,45 @@ async def update_user(
 
 ):
 
-    users = load_users()
+    user = db.query(User).filter(User.id == user_id).first()
 
-    for i, user in enumerate(users):
+    if user is None:
 
-        if user["user_id"] == user_id:
+        raise HTTPException(
+            status_code=404,
+            detail="User not found"
+        )
 
-            users[i] = {
+    user.full_name = name
+    user.email = email
+    user.phone = phone
+    user.password = password
 
-                "user_id": user_id,
+    db.commit()
 
-                "name": name,
-
-                "email": email,
-
-                "phone": phone,
-
-                "password": password
-
-            }
-
-            save_users(users)
-
-            return RedirectResponse(
-                "/users/landing",
-                status_code=status.HTTP_303_SEE_OTHER
-            )
-
-    raise HTTPException(
-        status_code=404,
-        detail="User not found"
+    return RedirectResponse(
+        "/users/landing",
+        status_code=status.HTTP_303_SEE_OTHER
     )
 # ==========================
 # Show Delete Page
 # ==========================
 
 @router.get("/delete/{user_id}", response_class=HTMLResponse)
-async def confirm_delete(request: Request, user_id: str):
+async def confirm_delete(
 
-    users = load_users()
+    request: Request,
 
-    user = None
+    user_id: int,
 
-    for u in users:
-        if u["user_id"] == user_id:
-            user = u
-            break
+    db: Session = Depends(get_db)
+
+):
+
+    user = db.query(User).filter(User.id == user_id).first()
 
     if user is None:
+
         raise HTTPException(
             status_code=404,
             detail="User not found"
@@ -290,24 +245,26 @@ async def confirm_delete(request: Request, user_id: str):
 # ==========================
 
 @router.post("/delete/{user_id}")
-async def delete_user(user_id: str):
+async def delete_user(
 
-    users = load_users()
+    user_id: int,
 
-    new_users = []
+    db: Session = Depends(get_db)
 
-    for user in users:
+):
 
-        if user["user_id"] != user_id:
-            new_users.append(user)
+    user = db.query(User).filter(User.id == user_id).first()
 
-    if len(new_users) == len(users):
+    if user is None:
+
         raise HTTPException(
             status_code=404,
             detail="User not found"
         )
 
-    save_users(new_users)
+    db.delete(user)
+
+    db.commit()
 
     return RedirectResponse(
         "/users/landing",

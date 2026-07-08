@@ -1,100 +1,129 @@
 {% extends "base.html" %}
 
 {% block title %}
-{% if editing %}
-ویرایش کاربر
-{% else %}
-افزودن کاربر
-{% endif %}
+کاربران
 {% endblock %}
 
 {% block content %}
 
-<h1>
-{% if editing %}
-✏️ ویرایش کاربر
-{% else %}
-➕ افزودن کاربر
-{% endif %}
-</h1>
+<h1>👥 مدیریت کاربران</h1>
 
 <div class="card">
 
-{% if error %}
-<div style="background:#f8d7da;color:#721c24;padding:10px;border-radius:8px;margin-bottom:15px;">
-{{ error }}
-</div>
-{% endif %}
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
 
-<form method="post"
-action="{% if editing %}/users/{{ user_id }}{% else %}/users/{% endif %}">
+        <form method="get" action="/users/landing">
 
-{% if editing %}
+            <input
+                type="text"
+                name="search"
+                placeholder="جستجوی نام، ایمیل یا تلفن..."
+                value="{{ search }}"
+            >
 
-<label>شناسه کاربر</label>
+            <button class="btn btn-primary">
+                🔍 جستجو
+            </button>
 
-<input
-type="text"
-value="{{ user.user_id }}"
-disabled>
+        </form>
 
-{% endif %}
+        <a href="/users/add" class="btn btn-success">
+            ➕ افزودن کاربر
+        </a>
 
-<label>نام</label>
+    </div>
 
-<input
-type="text"
-name="name"
-value="{{ user.name if user else '' }}"
-required>
+    <table class="table">
 
-<label>ایمیل</label>
+        <thead>
 
-<input
-type="email"
-name="email"
-value="{{ user.email if user else '' }}"
-required>
+        <tr>
 
-<label>شماره تماس</label>
+            <th>ID</th>
 
-<input
-type="text"
-name="phone"
-value="{{ user.phone if user else '' }}"
-required>
+            <th>نام</th>
 
-<label>رمز عبور</label>
+            <th>ایمیل</th>
 
-<input
-type="password"
-name="password"
-value="{{ user.password if user else '' }}"
-required>
+            <th>تلفن</th>
 
-<br><br>
+            <th>نقش</th>
 
-<button class="btn btn-success">
+            <th>عملیات</th>
 
-{% if editing %}
+        </tr>
 
-💾 ذخیره تغییرات
+        </thead>
 
-{% else %}
+        <tbody>
 
-➕ ثبت کاربر
+        {% for user in users %}
 
-{% endif %}
+        <tr>
 
-</button>
+            <td>{{ user.id }}</td>
 
-<a href="/users/landing" class="btn btn-secondary">
+            <td>{{ user.full_name }}</td>
 
-بازگشت
+            <td>{{ user.email }}</td>
 
-</a>
+            <td>{{ user.phone }}</td>
 
-</form>
+            <td>{{ user.role }}</td>
+
+            <td>
+
+                <a
+                    href="/users/edit/{{ user.id }}"
+                    class="btn btn-warning"
+                >
+                    ✏️
+                </a>
+
+                <a
+                    href="/users/delete/{{ user.id }}"
+                    class="btn btn-danger"
+                >
+                    🗑
+                </a>
+
+            </td>
+
+        </tr>
+
+        {% endfor %}
+
+        </tbody>
+
+    </table>
+
+    <div style="margin-top:20px;text-align:center;">
+
+        {% if current_page > 1 %}
+
+        <a
+            class="btn btn-secondary"
+            href="/users/landing?page={{ current_page-1 }}&search={{ search }}&sort={{ sort }}"
+        >
+            قبلی
+        </a>
+
+        {% endif %}
+
+        صفحه {{ current_page }} از {{ total_pages }}
+
+        {% if current_page < total_pages %}
+
+        <a
+            class="btn btn-secondary"
+            href="/users/landing?page={{ current_page+1 }}&search={{ search }}&sort={{ sort }}"
+        >
+            بعدی
+        </a>
+
+        {% endif %}
+
+    </div>
 
 </div>
 

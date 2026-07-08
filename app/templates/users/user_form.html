@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}
+{% if editing %}
+ویرایش کاربر
+{% else %}
+افزودن کاربر
+{% endif %}
+{% endblock %}
+
+{% block content %}
+
+<h1>
+{% if editing %}
+✏️ ویرایش کاربر
+{% else %}
+➕ افزودن کاربر
+{% endif %}
+</h1>
+
+<div class="card">
+
+{% if error %}
+<div style="background:#f8d7da;color:#721c24;padding:10px;border-radius:8px;margin-bottom:15px;">
+    {{ error }}
+</div>
+{% endif %}
+
+<form method="post"
+      action="{% if editing %}/users/{{ user.id }}{% else %}/users/{% endif %}">
+
+{% if editing %}
+
+<label>شناسه کاربر</label>
+
+<input
+type="text"
+value="{{ user.id }}"
+disabled>
+
+{% endif %}
+
+<label>نام</label>
+
+<input
+type="text"
+name="name"
+value="{{ user.full_name if user else '' }}"
+required>
+
+<label>ایمیل</label>
+
+<input
+type="email"
+name="email"
+value="{{ user.email if user else '' }}"
+required>
+
+<label>شماره تماس</label>
+
+<input
+type="text"
+name="phone"
+value="{{ user.phone if user else '' }}"
+required>
+
+<label>رمز عبور</label>
+
+<input
+type="password"
+name="password"
+value="{{ user.password if user else '' }}"
+required>
+
+<br><br>
+
+<button class="btn btn-success">
+
+{% if editing %}
+💾 ذخیره تغییرات
+{% else %}
+➕ ثبت کاربر
+{% endif %}
+
+</button>
+
+<a href="/users/landing" class="btn btn-secondary">
+بازگشت
+</a>
+
+</form>
+
+</div>
+
+{% endblock %}
