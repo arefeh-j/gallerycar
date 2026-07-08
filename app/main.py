@@ -5,6 +5,14 @@ from fastapi.templating import Jinja2Templates
 
 from app.routes.cars import router as cars_router
 from app.routes.users import router as users_router
+from app.database import engine, Base
+
+from app.models import user
+from app.models import brand
+from app.models import car
+from app.models import favorite
+from app.models import car_image
+from app.models import price_history
 
 import json
 import os
@@ -28,6 +36,8 @@ def load_users():
     with open(USERS_FILE, "r", encoding="utf-8") as f:
         return json.load(f)
 
+
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Online Car Gallery")
 
