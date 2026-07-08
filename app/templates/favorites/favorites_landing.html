@@ -14,51 +14,51 @@
 
 <table>
 
-    <thead>
+<thead>
 
-    <tr>
+<tr>
 
-        <th>برند</th>
-        <th>مدل</th>
-        <th>سال</th>
-        <th>قیمت</th>
-        <th>عملیات</th>
+<th>برند</th>
+<th>مدل</th>
+<th>سال</th>
+<th>قیمت</th>
+<th>عملیات</th>
 
-    </tr>
+</tr>
 
-    </thead>
+</thead>
 
-    <tbody>
+<tbody>
 
-    {% for car in favorites %}
+{% for favorite in favorites %}
 
-    <tr>
+<tr>
 
-        <td>{{ car.brand }}</td>
+<td>{{ favorite.car.brand.name }}</td>
 
-        <td>{{ car.model }}</td>
+<td>{{ favorite.car.model }}</td>
 
-        <td>{{ car.year }}</td>
+<td>{{ favorite.car.year }}</td>
 
-        <td>{{ "{:,}".format(car.price) }} تومان</td>
+<td>{{ "{:,.0f}".format(favorite.car.price) }} تومان</td>
 
-        <td>
+<td>
 
-            <a href="/cars/view/{{ car.id }}" class="btn btn-info">
-                مشاهده
-            </a>
+<a href="/cars/view/{{ favorite.car.id }}" class="btn btn-info">
+مشاهده
+</a>
 
-            <a href="/favorites/delete/{{ car.id }}" class="btn btn-danger">
-                حذف
-            </a>
+<a href="/favorites/delete/{{ favorite.id }}" class="btn btn-danger">
+حذف
+</a>
 
-        </td>
+</td>
 
-    </tr>
+</tr>
 
-    {% endfor %}
+{% endfor %}
 
-    </tbody>
+</tbody>
 
 </table>
 

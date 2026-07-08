@@ -9,7 +9,7 @@ class BrandCreate(BrandBase):
     pass
 
 
-class BrandResponse(BrandBase):
+class BrandRead(BrandBase):
     id: int
 
     class Config:

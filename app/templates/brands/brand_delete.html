@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}
+حذف برند
+{% endblock %}
+
+{% block content %}
+
+<h1>🗑 حذف برند</h1>
+
+<div class="card">
+
+<p>
+
+آیا از حذف برند
+
+<strong>{{ brand.name }}</strong>
+
+مطمئن هستید؟
+
+</p>
+
+<form method="post" action="/brands/delete/{{ brand.id }}">
+
+<button class="btn btn-danger">
+
+🗑 حذف
+
+</button>
+
+<a href="/brands/landing" class="btn btn-secondary">
+
+انصراف
+
+</a>
+
+</form>
+
+</div>
+
+{% endblock %}

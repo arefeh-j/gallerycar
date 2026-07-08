@@ -10,7 +10,7 @@ class FavoriteCreate(FavoriteBase):
     pass
 
 
-class FavoriteResponse(FavoriteBase):
+class FavoriteRead(FavoriteBase):
     id: int
 
     class Config:

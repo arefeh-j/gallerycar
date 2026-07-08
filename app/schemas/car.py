@@ -1,32 +1,27 @@
 from pydantic import BaseModel
-from typing import Optional
+from decimal import Decimal
 
 
 class CarBase(BaseModel):
-
     brand_id: int
+    user_id: int
     model: str
     year: int
-    price: float
+    price: Decimal
     mileage: int
-    color: Optional[str] = None
-    fuel_type: Optional[str] = None
-    transmission: Optional[str] = None
-    description: Optional[str] = None
+    color: str | None = None
+    fuel_type: str | None = None
+    transmission: str | None = None
+    description: str | None = None
     status: str
 
 
 class CarCreate(CarBase):
-    user_id: int
-
-
-class CarUpdate(CarBase):
     pass
 
 
-class CarResponse(CarBase):
+class CarRead(CarBase):
     id: int
-    user_id: int
 
     class Config:
         from_attributes = True

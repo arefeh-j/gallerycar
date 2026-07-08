@@ -8,18 +8,56 @@
 
 <h1>🚘 لیست برندها</h1>
 
+<div style="margin-bottom:20px;">
+
+<a href="/brands/add" class="btn btn-success">
+
+➕ افزودن برند
+
+</a>
+
+</div>
+
 <table>
 
 <tr>
+
     <th>ID</th>
+
     <th>نام برند</th>
+
+    <th>عملیات</th>
+
 </tr>
 
 {% for brand in brands %}
 
 <tr>
+
     <td>{{ brand.id }}</td>
+
     <td>{{ brand.name }}</td>
+
+    <td>
+
+        <a
+            href="/brands/edit/{{ brand.id }}"
+            class="btn btn-warning">
+
+            ✏️ ویرایش
+
+        </a>
+
+        <a
+            href="/brands/delete/{{ brand.id }}"
+            class="btn btn-danger">
+
+            🗑 حذف
+
+        </a>
+
+    </td>
+
 </tr>
 
 {% endfor %}
@@ -27,7 +65,9 @@
 </table>
 
 {% if not brands %}
+
 <p>هیچ برندی ثبت نشده است.</p>
+
 {% endif %}
 
 {% endblock %}

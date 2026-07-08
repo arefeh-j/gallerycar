@@ -1,76 +1,72 @@
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, Depends
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
-import json
-import os
+from sqlalchemy.orm import Session
+
+from app.database import get_db
+from app.models.favorite import Favorite
+from app.models.car import Car
 
 router = APIRouter()
 
 templates = Jinja2Templates(directory="app/templates")
 
-FAVORITES_FILE = "favorites.json"
-CARS_FILE = "cars.json"
 
-
-def load_favorites():
-    if not os.path.exists(FAVORITES_FILE):
-        return []
-
-    with open(FAVORITES_FILE, "r", encoding="utf-8") as f:
-        return json.load(f)
-
-
-def save_favorites(favorites):
-    with open(FAVORITES_FILE, "w", encoding="utf-8") as f:
-        json.dump(favorites, f, indent=4)
-
-
-def load_cars():
-    if not os.path.exists(CARS_FILE):
-        return []
-
-    with open(CARS_FILE, "r", encoding="utf-8") as f:
-        return json.load(f)
-
+# ==========================
+# Favorites Landing
+# ==========================
 
 @router.get("/landing", response_class=HTMLResponse)
-async def favorites_landing(request: Request):
+async def favorites_landing(
+    request: Request,
+    db: Session = Depends(get_db)
+):
 
-    favorites = load_favorites()
+    favorites = db.query(Favorite).all()
 
     return templates.TemplateResponse(
         request=request,
         name="favorites/favorites_landing.html",
         context={
+            "request": request,
             "favorites": favorites
         }
     )
 
 
+# ==========================
+# Add Favorite
+# ==========================
+
 @router.get("/add/{car_id}")
-async def add_to_favorites(car_id: str):
+async def add_to_favorites(
+    car_id: int,
+    db: Session = Depends(get_db)
+):
 
-    favorites = load_favorites()
-    cars = load_cars()
+    car = db.query(Car).filter(Car.id == car_id).first()
 
-    for car in cars:
+    if car is None:
+        return RedirectResponse(
+            "/cars/landing",
+            status_code=303
+        )
 
-        if car["id"] == car_id:
+    exists = db.query(Favorite).filter(
+        Favorite.user_id == car.user_id,
+        Favorite.car_id == car_id
+    ).first()
 
-            exists = False
+    if exists is None:
 
-            for fav in favorites:
+        favorite = Favorite(
+            user_id=car.user_id,
+            car_id=car_id
+        )
 
-                if fav["id"] == car_id:
-                    exists = True
-                    break
-
-            if not exists:
-                favorites.append(car)
-                save_favorites(favorites)
-
-            break
+        db.add(favorite)
+        db.commit()
 
     return RedirectResponse(
         "/favorites/landing",
@@ -78,19 +74,23 @@ async def add_to_favorites(car_id: str):
     )
 
 
-@router.get("/delete/{car_id}")
-async def delete_favorite(car_id: str):
+# ==========================
+# Delete Favorite
+# ==========================
 
-    favorites = load_favorites()
+@router.get("/delete/{favorite_id}")
+async def delete_favorite(
+    favorite_id: int,
+    db: Session = Depends(get_db)
+):
 
-    new_favorites = []
+    favorite = db.query(Favorite).filter(
+        Favorite.id == favorite_id
+    ).first()
 
-    for car in favorites:
-
-        if car["id"] != car_id:
-            new_favorites.append(car)
-
-    save_favorites(new_favorites)
+    if favorite:
+        db.delete(favorite)
+        db.commit()
 
     return RedirectResponse(
         "/favorites/landing",
