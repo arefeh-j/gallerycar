@@ -1,9 +1,77 @@
 {% extends "base.html" %}
 
+{% block title %}
+علاقه‌مندی‌ها
+{% endblock %}
+
 {% block content %}
 
-<h1 style="color:red;">Favorites Works!</h1>
+<h1>❤️ خودروهای مورد علاقه</h1>
 
-<p>Hello</p>
+{% if favorites %}
+
+<div class="card">
+
+<table>
+
+    <thead>
+
+    <tr>
+
+        <th>برند</th>
+        <th>مدل</th>
+        <th>سال</th>
+        <th>قیمت</th>
+        <th>عملیات</th>
+
+    </tr>
+
+    </thead>
+
+    <tbody>
+
+    {% for car in favorites %}
+
+    <tr>
+
+        <td>{{ car.brand }}</td>
+
+        <td>{{ car.model }}</td>
+
+        <td>{{ car.year }}</td>
+
+        <td>{{ "{:,}".format(car.price) }} تومان</td>
+
+        <td>
+
+            <a href="/cars/view/{{ car.id }}" class="btn btn-info">
+                مشاهده
+            </a>
+
+            <a href="/favorites/delete/{{ car.id }}" class="btn btn-danger">
+                حذف
+            </a>
+
+        </td>
+
+    </tr>
+
+    {% endfor %}
+
+    </tbody>
+
+</table>
+
+</div>
+
+{% else %}
+
+<div class="card">
+
+<h3>❤️ هنوز خودرویی به علاقه‌مندی‌ها اضافه نشده است.</h3>
+
+</div>
+
+{% endif %}
 
 {% endblock %}

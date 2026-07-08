@@ -1,134 +1,100 @@
 {% extends "base.html" %}
 
-{% block title %}Users{% endblock %}
+{% block title %}
+{% if editing %}
+ویرایش کاربر
+{% else %}
+افزودن کاربر
+{% endif %}
+{% endblock %}
 
 {% block content %}
 
-<h2><i class="fas fa-users"></i> Users Management</h2>
-
-<div style="margin:1.5rem 0;">
-    <a href="/users/add" class="btn btn-primary">
-        <i class="fas fa-plus"></i>
-        Add New User
-    </a>
-</div>
-
-<div class="card mb-4">
-    <div class="card-body">
-
-        <form method="get" action="/users/landing" class="d-flex gap-2">
-
-            <input
-                type="text"
-                name="search"
-                value="{{ search }}"
-                placeholder="Search by Name or Email"
-                class="form-control">
-
-            <select
-                name="sort"
-                class="form-select"
-                style="width:auto;">
-
-                <option value="default">Default</option>
-
-                <option value="user_id"
-                {% if sort=="user_id" %}selected{% endif %}>
-                Sort by ID
-                </option>
-
-                <option value="name"
-                {% if sort=="name" %}selected{% endif %}>
-                Sort by Name
-                </option>
-
-                <option value="email"
-                {% if sort=="email" %}selected{% endif %}>
-                Sort by Email
-                </option>
-
-            </select>
-
-            <button class="btn btn-primary">
-                Search
-            </button>
-
-        </form>
-
-    </div>
-</div>
+<h1>
+{% if editing %}
+✏️ ویرایش کاربر
+{% else %}
+➕ افزودن کاربر
+{% endif %}
+</h1>
 
 <div class="card">
 
-<div class="card-header">
-All Users
+{% if error %}
+<div style="background:#f8d7da;color:#721c24;padding:10px;border-radius:8px;margin-bottom:15px;">
+{{ error }}
 </div>
+{% endif %}
 
-<div class="card-body">
+<form method="post"
+action="{% if editing %}/users/{{ user_id }}{% else %}/users/{% endif %}">
 
-<table class="table">
+{% if editing %}
 
-<tr>
+<label>شناسه کاربر</label>
 
-<th>ID</th>
-<th>Name</th>
-<th>Email</th>
-<th>Phone</th>
-<th>Actions</th>
+<input
+type="text"
+value="{{ user.user_id }}"
+disabled>
 
-</tr>
+{% endif %}
 
-{% for user in users %}
+<label>نام</label>
 
-<tr>
+<input
+type="text"
+name="name"
+value="{{ user.name if user else '' }}"
+required>
 
-<td>{{ user.user_id }}</td>
+<label>ایمیل</label>
 
-<td>{{ user.name }}</td>
+<input
+type="email"
+name="email"
+value="{{ user.email if user else '' }}"
+required>
 
-<td>{{ user.email }}</td>
+<label>شماره تماس</label>
 
-<td>{{ user.phone }}</td>
+<input
+type="text"
+name="phone"
+value="{{ user.phone if user else '' }}"
+required>
 
-<td>
+<label>رمز عبور</label>
 
-<a
-class="btn btn-warning btn-sm"
-href="/users/edit/{{ user.user_id }}">
+<input
+type="password"
+name="password"
+value="{{ user.password if user else '' }}"
+required>
 
-Edit
+<br><br>
 
-</a>
+<button class="btn btn-success">
 
-<a
-class="btn btn-danger btn-sm"
-href="/users/delete/{{ user.user_id }}">
+{% if editing %}
 
-Delete
-
-</a>
-
-</td>
-
-</tr>
+💾 ذخیره تغییرات
 
 {% else %}
 
-<tr>
+➕ ثبت کاربر
 
-<td colspan="5">
+{% endif %}
 
-No users found.
+</button>
 
-</td>
+<a href="/users/landing" class="btn btn-secondary">
 
-</tr>
+بازگشت
 
-{% endfor %}
+</a>
 
-</table>
-
-</div>
+</form>
 
 </div>
 

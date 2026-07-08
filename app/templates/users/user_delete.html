@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}
+حذف کاربر
+{% endblock %}
+
+{% block content %}
+
+<h1>🗑 حذف کاربر</h1>
+
+<div class="card">
+
+<p>
+
+آیا از حذف این کاربر مطمئن هستید؟
+
+</p>
+
+<table>
+
+<tr>
+
+<th>شناسه</th>
+
+<td>{{ user.user_id }}</td>
+
+</tr>
+
+<tr>
+
+<th>نام</th>
+
+<td>{{ user.name }}</td>
+
+</tr>
+
+<tr>
+
+<th>ایمیل</th>
+
+<td>{{ user.email }}</td>
+
+</tr>
+
+<tr>
+
+<th>شماره تماس</th>
+
+<td>{{ user.phone }}</td>
+
+</tr>
+
+</table>
+
+<br>
+
+<form
+method="post"
+action="/users/delete/{{ user.user_id }}">
+
+<button
+class="btn btn-danger">
+
+🗑 حذف
+
+</button>
+
+<a
+href="/users/landing"
+class="btn btn-secondary">
+
+انصراف
+
+</a>
+
+</form>
+
+</div>
+
+{% endblock %}
