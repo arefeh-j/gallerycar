@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}
+{% if editing %}
+ویرایش برند
+{% else %}
+افزودن برند
+{% endif %}
+{% endblock %}
+
+{% block content %}
+
+<h1>
+{% if editing %}
+✏️ ویرایش برند
+{% else %}
+➕ افزودن برند
+{% endif %}
+</h1>
+
+<div class="card">
+
+{% if error %}
+<div style="background:#f8d7da;color:#721c24;padding:10px;border-radius:8px;margin-bottom:15px;">
+{{ error }}
+</div>
+{% endif %}
+
+<form method="post"
+action="{% if editing %}/brands/{{ brand.id }}{% else %}/brands/{% endif %}">
+
+<label>نام برند</label>
+
+<input
+type="text"
+name="name"
+value="{{ brand.name if brand else '' }}"
+required>
+
+<br><br>
+
+<button class="btn btn-success">
+
+{% if editing %}
+💾 ذخیره تغییرات
+{% else %}
+➕ ثبت برند
+{% endif %}
+
+</button>
+
+<a href="/brands/landing" class="btn btn-secondary">
+بازگشت
+</a>
+
+</form>
+
+</div>
+
+{% endblock %}

@@ -1,112 +1,128 @@
 {% extends "base.html" %}
 
 {% block title %}
-گالری خودرو
+لیست خودروها
 {% endblock %}
 
 {% block content %}
 
-<h1>🚗 داشبورد گالری خودرو</h1>
+<h1>🚗 لیست خودروها</h1>
 
-<p style="margin-bottom:25px;">
-به سامانه مدیریت گالری خودرو خوش آمدید.
-</p>
+<div style="margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;">
 
-<div class="stats">
+<form method="get" action="/cars/landing">
 
-    <div class="stat-card">
-        <h2>{{ total_cars }}</h2>
-        <p>کل خودروها</p>
-    </div>
+<input
+type="text"
+name="search"
+placeholder="جستجوی مدل..."
+value="{{ search }}">
 
-    <div class="stat-card">
-        <h2>{{ total_users }}</h2>
-        <p>کل کاربران</p>
-    </div>
+<select name="sort">
 
-    <div class="stat-card">
-        <h2>{{ available_cars }}</h2>
-        <p>خودروهای موجود</p>
-    </div>
+<option value="default" {% if sort=="default" %}selected{% endif %}>
+پیش فرض
+</option>
 
-    <div class="stat-card">
-        <h2>{{ sold_cars }}</h2>
-        <p>خودروهای فروخته شده</p>
-    </div>
+<option value="brand" {% if sort=="brand" %}selected{% endif %}>
+برند
+</option>
 
-    <div class="stat-card">
-        <h2>{{ brands }}</h2>
-        <p>تعداد برندها</p>
-    </div>
+<option value="price" {% if sort=="price" %}selected{% endif %}>
+قیمت
+</option>
+
+<option value="year" {% if sort=="year" %}selected{% endif %}>
+سال
+</option>
+
+</select>
+
+<button class="btn btn-primary">
+جستجو
+</button>
+
+</form>
+
+<a href="/cars/add" class="btn btn-success">
+➕ افزودن خودرو
+</a>
 
 </div>
 
-<br>
-
-<div class="card">
-
-<h2>💰 ارزان‌ترین خودرو</h2>
-
-{% if cheapest %}
+{% if cars %}
 
 <table>
 
 <tr>
+<th>ID</th>
 <th>برند</th>
-<td>{{ cheapest.brand }}</td>
-</tr>
-
-<tr>
 <th>مدل</th>
-<td>{{ cheapest.model }}</td>
+<th>سال</th>
+<th>قیمت</th>
+<th>عملیات</th>
 </tr>
 
+{% for car in cars %}
+
 <tr>
-<th>قیمت</th>
-<td>{{ "{:,}".format(cheapest.price) }} تومان</td>
+
+<td>{{ car.id }}</td>
+
+<td>{{ car.brand.name }}</td>
+
+<td>{{ car.model }}</td>
+
+<td>{{ car.year }}</td>
+
+<td>{{ "{:,.0f}".format(car.price) }}</td>
+
+<td>
+
+<a href="/cars/view/{{ car.id }}" class="btn btn-info">
+مشاهده
+</a>
+
+<a href="/cars/edit/{{ car.id }}" class="btn btn-warning">
+ویرایش
+</a>
+
+<a href="/cars/delete/{{ car.id }}" class="btn btn-danger">
+حذف
+</a>
+
+</td>
+
 </tr>
+
+{% endfor %}
 
 </table>
 
 {% else %}
 
-<p>خودرویی ثبت نشده است.</p>
+<p>هیچ خودرویی ثبت نشده است.</p>
 
 {% endif %}
 
+{% if total_pages > 1 %}
+
+<div style="margin-top:20px;text-align:center;">
+
+{% for p in range(1,total_pages+1) %}
+
+<a
+class="btn {% if p==current_page %}btn-success{% else %}btn-secondary{% endif %}"
+href="/cars/landing?page={{p}}&sort={{sort}}&search={{search}}">
+
+{{p}}
+
+</a>
+
+{% endfor %}
+
 </div>
-
-<div class="card">
-
-<h2>💎 گران‌ترین خودرو</h2>
-
-{% if expensive %}
-
-<table>
-
-<tr>
-<th>برند</th>
-<td>{{ expensive.brand }}</td>
-</tr>
-
-<tr>
-<th>مدل</th>
-<td>{{ expensive.model }}</td>
-</tr>
-
-<tr>
-<th>قیمت</th>
-<td>{{ "{:,}".format(expensive.price) }} تومان</td>
-</tr>
-
-</table>
-
-{% else %}
-
-<p>خودرویی ثبت نشده است.</p>
 
 {% endif %}
-
-</div>
 
 {% endblock %}

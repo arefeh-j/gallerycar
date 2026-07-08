@@ -14,6 +14,8 @@ from app.models import favorite
 from app.models import car_image
 from app.models import price_history
 
+from app.routes.brands import router as brands_router
+
 import json
 import os
 
@@ -46,6 +48,7 @@ app.mount("/static", StaticFiles(directory="app/static"), name="static")
 app.include_router(cars_router, prefix="/cars")
 app.include_router(users_router, prefix="/users")
 app.include_router(favorites_router, prefix="/favorites")
+app.include_router(brands_router, prefix="/brands")
 
 templates = Jinja2Templates(directory="app/templates")
 

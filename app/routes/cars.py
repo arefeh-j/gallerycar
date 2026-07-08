@@ -1,98 +1,106 @@
-from fastapi import APIRouter, Request, Query
+
+from fastapi import APIRouter, Request, Query, Depends
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse, RedirectResponse
-import os
-import json
+from fastapi import Form, status, HTTPException
+
+from sqlalchemy.orm import Session
+from sqlalchemy import or_
+
 import math
 
+from app.database import get_db
+from app.models.car import Car
+from app.models.brand import Brand
+from app.models.user import User
+
 router = APIRouter()
+
 templates = Jinja2Templates(directory="app/templates")
 
-CARS_FILE = "cars.json"
 ITEMS_PER_PAGE = 5
-
-
-def load_cars():
-    if not os.path.exists(CARS_FILE):
-        return []
-
-    with open(CARS_FILE, "r", encoding="utf-8") as f:
-        return json.load(f)
-
-
 @router.get("/landing", response_class=HTMLResponse)
 async def cars_landing(
+
     request: Request,
-    sort: str = Query(
-        "default",
-        pattern="^(default|brand|price|year|mileage)$"
-    ),
+
+    db: Session = Depends(get_db),
+
+    sort: str = Query("default"),
+
     page: int = Query(1, ge=1),
-    search: str = Query(None)
+
+    search: str = Query("")
+
 ):
+    print("✅ CARS ROUTE WORKING")
+    query = db.query(Car)
 
-    cars = load_cars()
-
-    # Search
     if search:
-        search_lower = search.lower()
 
-        filtered = []
+        query = query.filter(
 
-        for car in cars:
+            or_(
 
-            if (
-                search_lower in car["brand"].lower()
-                or search_lower in car["model"].lower()
-            ):
-                filtered.append(car)
+                Car.model.ilike(f"%{search}%")
 
-        cars = filtered
+            )
 
-    # Sorting
-    if sort == "brand":
-        cars = sorted(cars, key=lambda x: x["brand"].lower())
+        )
 
-    elif sort == "price":
-        cars = sorted(cars, key=lambda x: x["price"])
+    if sort == "price":
+
+        query = query.order_by(Car.price)
 
     elif sort == "year":
-        cars = sorted(cars, key=lambda x: x["year"])
+
+        query = query.order_by(Car.year)
 
     elif sort == "mileage":
-        cars = sorted(cars, key=lambda x: x["mileage"])
 
-    # Pagination
+        query = query.order_by(Car.mileage)
 
-    total_items = len(cars)
+    else:
+
+        query = query.order_by(Car.id)
+
+    total_items = query.count()
 
     total_pages = math.ceil(total_items / ITEMS_PER_PAGE)
 
-    start = (page - 1) * ITEMS_PER_PAGE
-    end = start + ITEMS_PER_PAGE
+    cars = query.offset(
 
-    paginated_cars = cars[start:end]
+        (page - 1) * ITEMS_PER_PAGE
 
-    if page > total_pages and total_pages > 0:
+    ).limit(
 
-        return RedirectResponse(
-            url=f"/cars/landing?sort={sort}&page={total_pages}&search={search or ''}",
-            status_code=303
-        )
+        ITEMS_PER_PAGE
+
+    ).all()
 
     return templates.TemplateResponse(
+
         request=request,
+
         name="cars/cars_landing.html",
+
         context={
-            "cars": paginated_cars,
+
+            "cars": cars,
+
             "total_items": total_items,
+
             "current_page": page,
+
             "total_pages": total_pages,
+
             "sort": sort,
-            "search": search or "",
+
+            "search": search
+
         }
+
     )
-from fastapi import Form, status
 
 @router.get("/add", response_class=HTMLResponse)
 async def add_car_form(request: Request):
@@ -105,111 +113,115 @@ async def add_car_form(request: Request):
             "car_id": None
         }
     )
-
-
-@router.post("/", response_class=HTMLResponse)
+@router.post("/")
 async def create_car(
+
     request: Request,
-    id: str = Form(...),
-    brand: str = Form(...),
+
+    db: Session = Depends(get_db),
+
+    brand_id: int = Form(...),
+
+    user_id: int = Form(...),
+
     model: str = Form(...),
+
     year: int = Form(...),
-    price: int = Form(...),
+
+    price: float = Form(...),
+
     mileage: int = Form(...),
-    status: str = Form(...),
-    seller: str = Form(...)
+
+    color: str = Form(...),
+
+    fuel_type: str = Form(...),
+
+    transmission: str = Form(...),
+
+    description: str = Form(...)
+
 ):
 
-    cars = load_cars()
+    new_car = Car(
 
-    # جلوگیری از ثبت شناسه تکراری
-    for car in cars:
-        if car["id"] == id:
+        user_id=user_id,
 
-            error_msg = f"Car ID '{id}' already exists."
+        brand_id=brand_id,
 
-            return templates.TemplateResponse(
-                request=request,
-                name="cars/car_form.html",
-                context={
-                    "editing": False,
-                    "car": None,
-                    "car_id": None,
-                    "error": error_msg,
-                    "form_data": {
-                        "id": id,
-                        "brand": brand,
-                        "model": model,
-                        "year": year,
-                        "price": price,
-                        "mileage": mileage,
-                        "status": status,
-                        "seller": seller
-                    }
-                },
-                status_code=status.HTTP_400_BAD_REQUEST
-            )
+        model=model,
 
-    new_car = {
-        "id": id,
-        "brand": brand,
-        "model": model,
-        "year": year,
-        "price": price,
-        "mileage": mileage,
-        "status": status,
-        "seller": seller
-    }
+        year=year,
 
-    cars.append(new_car)
+        price=price,
 
-    with open(CARS_FILE, "w", encoding="utf-8") as f:
-        json.dump(cars, f, indent=4)
+        mileage=mileage,
+
+        color=color,
+
+        fuel_type=fuel_type,
+
+        transmission=transmission,
+
+        description=description
+
+    )
+
+    db.add(new_car)
+
+    db.commit()
 
     return RedirectResponse(
-        "/cars/landing",
-        status_code=status.HTTP_303_SEE_OTHER
-    )
-from fastapi import HTTPException
 
+        "/cars/landing",
+
+        status_code=status.HTTP_303_SEE_OTHER
+
+    )
 
 @router.get("/edit/{car_id}", response_class=HTMLResponse)
-async def edit_car_form(request: Request, car_id: str):
+async def edit_car_form(
 
-    cars = load_cars()
+    request: Request,
 
-    car = None
+    car_id: int,
 
-    for c in cars:
-        if c["id"] == car_id:
-            car = c
-            break
+    db: Session = Depends(get_db)
+
+):
+
+    car = db.query(Car).filter(Car.id == car_id).first()
 
     if car is None:
-        raise HTTPException(status_code=404, detail="Car not found")
+
+        raise HTTPException(
+            status_code=404,
+            detail="Car not found"
+        )
 
     return templates.TemplateResponse(
         request=request,
         name="cars/car_form.html",
         context={
             "editing": True,
-            "car": car,
-            "car_id": car_id
+            "car": car
         }
     )
+
 @router.get("/view/{car_id}", response_class=HTMLResponse)
-async def view_car(request: Request, car_id: str):
+async def view_car(
 
-    cars = load_cars()
+    request: Request,
 
-    car = None
+    car_id: int,
 
-    for c in cars:
-        if c["id"] == car_id:
-            car = c
-            break
+    db: Session = Depends(get_db)
+
+):
+
+    car = db.query(Car).filter(Car.id == car_id).first()
 
     if car is None:
+
         raise HTTPException(
             status_code=404,
             detail="Car not found"
@@ -222,68 +234,81 @@ async def view_car(request: Request, car_id: str):
             "request": request,
             "car": car
         }
-)
+    )
 
 @router.post("/{car_id}")
 async def update_car(
 
-    car_id: str,
+    car_id: int,
 
-    brand: str = Form(...),
+    db: Session = Depends(get_db),
+
+    user_id: int = Form(...),
+
+    brand_id: int = Form(...),
+
     model: str = Form(...),
+
     year: int = Form(...),
-    price: int = Form(...),
+
+    price: float = Form(...),
+
     mileage: int = Form(...),
-    status: str = Form(...),
-    seller: str = Form(...)
+
+    color: str = Form(...),
+
+    fuel_type: str = Form(...),
+
+    transmission: str = Form(...),
+
+    description: str = Form(...)
 
 ):
 
-    cars = load_cars()
+    car = db.query(Car).filter(Car.id == car_id).first()
 
-    for i, car in enumerate(cars):
+    if car is None:
 
-        if car["id"] == car_id:
+        raise HTTPException(
+            status_code=404,
+            detail="Car not found"
+        )
 
-            cars[i] = {
+    car.user_id = user_id
+    car.brand_id = brand_id
+    car.model = model
+    car.year = year
+    car.price = price
+    car.mileage = mileage
+    car.color = color
+    car.fuel_type = fuel_type
+    car.transmission = transmission
+    car.description = description
 
-                "id": car_id,
-                "brand": brand,
-                "model": model,
-                "year": year,
-                "price": price,
-                "mileage": mileage,
-                "status": status,
-                "seller": seller
+    db.commit()
 
-            }
-
-            with open(CARS_FILE, "w", encoding="utf-8") as f:
-                json.dump(cars, f, indent=4)
-
-            return RedirectResponse(
-                "/cars/landing",
-                status_code=status.HTTP_303_SEE_OTHER
-            )
-
-    raise HTTPException(status_code=404, detail="Car not found")
+    return RedirectResponse(
+        "/cars/landing",
+        status_code=status.HTTP_303_SEE_OTHER
+    )
 # ==========================
 # Show Delete Confirmation
 # ==========================
-
 @router.get("/delete/{car_id}", response_class=HTMLResponse)
-async def confirm_delete(request: Request, car_id: str):
+async def confirm_delete(
 
-    cars = load_cars()
+    request: Request,
 
-    car = None
+    car_id: int,
 
-    for c in cars:
-        if c["id"] == car_id:
-            car = c
-            break
+    db: Session = Depends(get_db)
+
+):
+
+    car = db.query(Car).filter(Car.id == car_id).first()
 
     if car is None:
+
         raise HTTPException(
             status_code=404,
             detail="Car not found"
@@ -301,54 +326,29 @@ async def confirm_delete(request: Request, car_id: str):
 # ==========================
 # Delete Car
 # ==========================
-
 @router.post("/delete/{car_id}")
-async def delete_car(car_id: str):
+async def delete_car(
 
-    cars = load_cars()
+    car_id: int,
 
-    new_cars = []
+    db: Session = Depends(get_db)
 
-    for car in cars:
+):
 
-        if car["id"] != car_id:
-            new_cars.append(car)
+    car = db.query(Car).filter(Car.id == car_id).first()
 
-    if len(new_cars) == len(cars):
+    if car is None:
+
         raise HTTPException(
             status_code=404,
             detail="Car not found"
         )
 
-    with open(CARS_FILE, "w", encoding="utf-8") as f:
-        json.dump(new_cars, f, indent=4)
+    db.delete(car)
+
+    db.commit()
 
     return RedirectResponse(
         "/cars/landing",
         status_code=status.HTTP_303_SEE_OTHER
-    )
-@router.get("/view/{car_id}", response_class=HTMLResponse)
-async def view_car(request: Request, car_id: str):
-
-    cars = load_cars()
-
-    car = None
-
-    for c in cars:
-        if c["id"] == car_id:
-            car = c
-            break
-
-    if car is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Car not found"
-        )
-
-    return templates.TemplateResponse(
-        request=request,
-        name="cars/car_view.html",
-        context={
-            "car": car
-        }
     )

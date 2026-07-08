@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}
+برندها
+{% endblock %}
+
+{% block content %}
+
+<h1>🚘 لیست برندها</h1>
+
+<table>
+
+<tr>
+    <th>ID</th>
+    <th>نام برند</th>
+</tr>
+
+{% for brand in brands %}
+
+<tr>
+    <td>{{ brand.id }}</td>
+    <td>{{ brand.name }}</td>
+</tr>
+
+{% endfor %}
+
+</table>
+
+{% if not brands %}
+<p>هیچ برندی ثبت نشده است.</p>
+{% endif %}
+
+{% endblock %}

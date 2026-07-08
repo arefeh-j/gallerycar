@@ -11,146 +11,108 @@
 {% block content %}
 
 <h1>
-    {% if editing %}
-    ✏️ ویرایش خودرو
-    {% else %}
-    ➕ افزودن خودرو
-    {% endif %}
+{% if editing %}
+✏️ ویرایش خودرو
+{% else %}
+➕ افزودن خودرو
+{% endif %}
 </h1>
 
 <div class="card">
 
 <form method="post"
-      action="{% if editing %}/cars/{{ car_id }}{% else %}/cars/{% endif %}">
+action="{% if editing %}/cars/{{ car.id }}{% else %}/cars/{% endif %}">
 
-{% if error %}
-<div style="background:#f8d7da;color:#721c24;padding:10px;border-radius:6px;margin-bottom:15px;">
-    {{ error }}
-</div>
-{% endif %}
-
-{% if not editing %}
-
-<label>شناسه خودرو</label>
+<label>شناسه کاربر</label>
 
 <input
-    type="text"
-    name="id"
-    value="{{ form_data.id if form_data else '' }}"
-    required>
+type="number"
+name="user_id"
+value="{{ car.user_id if car else '' }}"
+required>
 
-{% else %}
-
-<label>شناسه خودرو</label>
+<label>شناسه برند</label>
 
 <input
-    type="text"
-    value="{{ car.id }}"
-    disabled>
-
-{% endif %}
-
-
-<label>برند</label>
-
-<input
-    type="text"
-    name="brand"
-    value="{% if editing %}{{ car.brand }}{% elif form_data %}{{ form_data.brand }}{% endif %}"
-    required>
-
+type="number"
+name="brand_id"
+value="{{ car.brand_id if car else '' }}"
+required>
 
 <label>مدل</label>
 
 <input
-    type="text"
-    name="model"
-    value="{% if editing %}{{ car.model }}{% elif form_data %}{{ form_data.model }}{% endif %}"
-    required>
-
+type="text"
+name="model"
+value="{{ car.model if car else '' }}"
+required>
 
 <label>سال تولید</label>
 
 <input
-    type="number"
-    name="year"
-    value="{% if editing %}{{ car.year }}{% elif form_data %}{{ form_data.year }}{% endif %}"
-    required>
+type="number"
+name="year"
+value="{{ car.year if car else '' }}"
+required>
 
-
-<label>قیمت (تومان)</label>
-
-<input
-    type="number"
-    name="price"
-    value="{% if editing %}{{ car.price }}{% elif form_data %}{{ form_data.price }}{% endif %}"
-    required>
-
-
-<label>کارکرد (km)</label>
+<label>قیمت</label>
 
 <input
-    type="number"
-    name="mileage"
-    value="{% if editing %}{{ car.mileage }}{% elif form_data %}{{ form_data.mileage }}{% endif %}"
-    required>
+type="number"
+name="price"
+value="{{ car.price if car else '' }}"
+required>
 
-
-<label>وضعیت</label>
-
-<select name="status">
-
-<option value="available"
-{% if editing and car.status=="available" %}
-selected
-{% endif %}
->
-موجود
-</option>
-
-<option value="sold"
-{% if editing and car.status=="sold" %}
-selected
-{% endif %}
->
-فروخته شده
-</option>
-
-</select>
-
-
-<label>فروشنده</label>
+<label>کارکرد</label>
 
 <input
-    type="text"
-    name="seller"
-    value="{% if editing %}{{ car.seller }}{% elif form_data %}{{ form_data.seller }}{% endif %}"
-    required>
+type="number"
+name="mileage"
+value="{{ car.mileage if car else '' }}"
+required>
 
+<label>رنگ</label>
 
-<div style="margin-top:20px;display:flex;gap:10px;">
+<input
+type="text"
+name="color"
+value="{{ car.color if car else '' }}">
 
-<button class="btn btn-success" type="submit">
+<label>نوع سوخت</label>
+
+<input
+type="text"
+name="fuel_type"
+value="{{ car.fuel_type if car else '' }}">
+
+<label>گیربکس</label>
+
+<input
+type="text"
+name="transmission"
+value="{{ car.transmission if car else '' }}">
+
+<label>توضیحات</label>
+
+<textarea
+name="description"
+rows="4">{{ car.description if car else '' }}</textarea>
+
+<br><br>
+
+<button class="btn btn-success">
 
 {% if editing %}
-
 💾 ذخیره تغییرات
-
 {% else %}
-
 ➕ ثبت خودرو
-
 {% endif %}
 
 </button>
 
 <a href="/cars/landing" class="btn btn-secondary">
-
-↩ بازگشت
-
+بازگشت
 </a>
-
-</div>
 
 </form>
 
