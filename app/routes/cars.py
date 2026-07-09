@@ -141,6 +141,8 @@ async def create_car(
     description: str = Form(...)
 
 ):
+    print("CREATE CAR CALLED")
+
 
     new_car = Car(
 
@@ -345,6 +347,9 @@ async def delete_car(
         )
 
     db.delete(car)
+    print("Images:", len(car.images))
+    print("Favorites:", len(car.favorites))
+    print("History:", len(car.price_history))
 
     db.commit()
 

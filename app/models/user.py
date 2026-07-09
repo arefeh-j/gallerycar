@@ -36,5 +36,6 @@ class User(Base):
 
     favorites = relationship(
         "Favorite",
-        back_populates="user"
+        back_populates="user",
+        cascade="all, delete-orphan"
     )

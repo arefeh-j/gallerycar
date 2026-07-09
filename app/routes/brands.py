@@ -80,6 +80,36 @@ async def create_brand(
         "/brands/landing",
         status_code=status.HTTP_303_SEE_OTHER
     )
+# ==========================
+# Edit Brand
+# ==========================
+
+@router.get("/edit/{brand_id}", response_class=HTMLResponse)
+async def edit_brand_form(
+    request: Request,
+    brand_id: int,
+    db: Session = Depends(get_db)
+):
+
+    brand = db.query(Brand).filter(
+        Brand.id == brand_id
+    ).first()
+
+    if brand is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Brand not found"
+        )
+
+    return templates.TemplateResponse(
+        request=request,
+        name="brands/brand_form.html",
+        context={
+            "editing": True,
+            "brand": brand
+        }
+    )
+
 @router.post("/{brand_id}")
 async def update_brand(
 

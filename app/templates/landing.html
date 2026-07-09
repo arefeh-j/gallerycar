@@ -51,7 +51,7 @@ Online Car Gallery
 
         {% if cheapest %}
 
-        <p><b>Brand:</b> {{ cheapest.brand }}</p>
+        <p><b>Brand:</b> {{ cheapest.brand.name}}</p>
 
         <p><b>Model:</b> {{ cheapest.model }}</p>
 
@@ -73,7 +73,7 @@ Online Car Gallery
 
         {% if expensive %}
 
-        <p><b>Brand:</b> {{ expensive.brand }}</p>
+        <p><b>Brand:</b> {{ expensive.brand.name }}</p>
 
         <p><b>Model:</b> {{ expensive.model }}</p>
 

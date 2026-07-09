@@ -16,27 +16,16 @@ from app.models import price_history
 
 from app.routes.brands import router as brands_router
 
-import json
-import os
+from sqlalchemy.orm import Session
+from sqlalchemy import func
 
-CARS_FILE = "cars.json"
-USERS_FILE = "users.json"
+from app.database import get_db
+from app.models.user import User
+from app.models.car import Car
+from app.models.brand import Brand
 
+from fastapi import Depends
 
-def load_cars():
-    if not os.path.exists(CARS_FILE):
-        return []
-
-    with open(CARS_FILE, "r", encoding="utf-8") as f:
-        return json.load(f)
-
-
-def load_users():
-    if not os.path.exists(USERS_FILE):
-        return []
-
-    with open(USERS_FILE, "r", encoding="utf-8") as f:
-        return json.load(f)
 
 
 Base.metadata.create_all(bind=engine)
@@ -54,32 +43,31 @@ templates = Jinja2Templates(directory="app/templates")
 
 
 @app.get("/")
-async def root(request: Request):
+async def root(
+    request: Request,
+    db: Session = Depends(get_db)
+):
 
-    cars = load_cars()
-    users = load_users()
+    cars = db.query(Car).all()
+    users = db.query(User).all()
 
     total_cars = len(cars)
     total_users = len(users)
 
-    available_cars = sum(
-        1 for car in cars
-        if car.get("status") == "available"
-    )
+    available_cars = db.query(Car).filter(
+        Car.status == "approved"
+    ).count()
 
-    sold_cars = sum(
-        1 for car in cars
-        if car.get("status") == "sold"
-    )
+    sold_cars = 0
 
-    brands = len(set(car.get("brand", "") for car in cars if car.get("brand")))
+    brands = db.query(Brand).count()
 
     if cars:
-       cheapest = min(cars, key=lambda x: x.get("price", float("inf")))
-       expensive = max(cars, key=lambda x: x.get("price", float("-inf")))
+        cheapest = min(cars, key=lambda x: x.price)
+        expensive = max(cars, key=lambda x: x.price)
     else:
-       cheapest = None
-       expensive = None
+        cheapest = None
+        expensive = None
 
     return templates.TemplateResponse(
         request=request,

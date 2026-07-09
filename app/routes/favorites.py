@@ -89,6 +89,9 @@ async def delete_favorite(
     ).first()
 
     if favorite:
+
+        print(f"Deleting favorite id={favorite_id}")
+
         db.delete(favorite)
         db.commit()
 

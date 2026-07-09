@@ -11,66 +11,45 @@
 <div class="card">
 
 <p>
-
 آیا از حذف این کاربر مطمئن هستید؟
-
 </p>
 
 <table>
 
 <tr>
-
 <th>شناسه</th>
-
-<td>{{ user.user_id }}</td>
-
+<td>{{ user.id }}</td>
 </tr>
 
 <tr>
-
 <th>نام</th>
-
-<td>{{ user.name }}</td>
-
+<td>{{ user.full_name }}</td>
 </tr>
 
 <tr>
-
 <th>ایمیل</th>
-
 <td>{{ user.email }}</td>
-
 </tr>
 
 <tr>
-
 <th>شماره تماس</th>
-
 <td>{{ user.phone }}</td>
-
 </tr>
 
 </table>
 
 <br>
 
-<form
-method="post"
-action="/users/delete/{{ user.user_id }}">
+<form method="post"
+      action="/users/delete/{{ user.id }}">
 
-<button
-class="btn btn-danger">
-
+<button class="btn btn-danger">
 🗑 حذف
-
 </button>
 
-<a
-href="/users/landing"
-class="btn btn-secondary">
-
+<a href="/users/landing"
+   class="btn btn-secondary">
 انصراف
-
 </a>
 
 </form>

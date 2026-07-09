@@ -1,4 +1,13 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Text, DECIMAL, Enum, TIMESTAMP
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    ForeignKey,
+    Text,
+    DECIMAL,
+    Enum,
+    TIMESTAMP,
+)
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 
@@ -49,6 +58,10 @@ class Car(Base):
         server_default=func.now()
     )
 
+    # =====================
+    # Relationships
+    # =====================
+
     owner = relationship(
         "User",
         back_populates="cars"
@@ -61,15 +74,18 @@ class Car(Base):
 
     favorites = relationship(
         "Favorite",
-        back_populates="car"
+        back_populates="car",
+        cascade="all, delete-orphan"
     )
 
     images = relationship(
         "CarImage",
-        back_populates="car"
+        back_populates="car",
+        cascade="all, delete-orphan"
     )
 
     price_history = relationship(
         "PriceHistory",
-        back_populates="car"
+        back_populates="car",
+        cascade="all, delete-orphan"
     )
