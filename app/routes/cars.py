@@ -3,6 +3,7 @@ from fastapi import APIRouter, Request, Query, Depends
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi import Form, status, HTTPException
+from fastapi.responses import JSONResponse
 
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
@@ -357,3 +358,48 @@ async def delete_car(
         "/cars/landing",
         status_code=status.HTTP_303_SEE_OTHER
     )
+# ==========================
+# REST API - Cars
+# ==========================
+
+@router.get("")
+async def get_cars_api(
+    db: Session = Depends(get_db)
+):
+
+    cars = db.query(Car).all()
+
+    result = []
+
+    for car in cars:
+        result.append({
+            "id": car.id,
+            "model": car.model,
+            "year": car.year,
+            "price": float(car.price),
+            "brand": car.brand.name if car.brand else "",
+            "owner": car.owner.full_name if car.owner else ""
+        })
+
+    return result
+# ==========================
+# REST API - Cars
+# ==========================
+
+@router.get("/api")
+async def get_cars_api(
+    db: Session = Depends(get_db)
+):
+
+    cars = db.query(Car).all()
+
+    return [
+        {
+            "id": car.id,
+            "model": car.model,
+            "year": car.year,
+            "price": float(car.price),
+            "brand": car.brand.name if car.brand else ""
+        }
+        for car in cars
+    ]

@@ -1,11 +1,17 @@
-from fastapi import FastAPI, Request
-from app.routes.favorites import router as favorites_router
+from fastapi import FastAPI, Request, Depends
+from fastapi.middleware.cors import CORSMiddleware
+
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
+from sqlalchemy.orm import Session
+
+from app.database import engine, Base, get_db
+
 from app.routes.cars import router as cars_router
 from app.routes.users import router as users_router
-from app.database import engine, Base
+from app.routes.favorites import router as favorites_router
+from app.routes.brands import router as brands_router
 
 from app.models import user
 from app.models import brand
@@ -14,23 +20,27 @@ from app.models import favorite
 from app.models import car_image
 from app.models import price_history
 
-from app.routes.brands import router as brands_router
-
-from sqlalchemy.orm import Session
-from sqlalchemy import func
-
-from app.database import get_db
 from app.models.user import User
 from app.models.car import Car
 from app.models.brand import Brand
 
-from fastapi import Depends
-
-
-
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Online Car Gallery")
+
+# -----------------------------
+# CORS
+# -----------------------------
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
