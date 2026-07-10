@@ -1,10 +1,14 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import axios from "axios"
+import { useRouter } from "vue-router"
+import { ref, computed } from "vue"
 
-const email = ref("");
-const password = ref("");
-const remember = ref(false);
-const showPassword = ref(false);
+const router = useRouter()
+
+const email = ref("")
+const password = ref("")
+const remember = ref(false)
+const showPassword = ref(false)
 
 const emailRegex =
   /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[A-Za-z]{2,}$/;
@@ -30,8 +34,48 @@ const isValid = computed(() => {
   );
 });
 
-function login() {
-  alert("در نسخه بعدی به FastAPI متصل می‌شود.");
+async function login() {
+
+  try {
+
+    const response = await axios.post(
+      "http://127.0.0.1:8000/users/api/login",
+      {
+        email: email.value,
+        password: password.value
+      }
+    )
+
+    localStorage.setItem(
+      "token",
+      response.data.access_token
+    )
+
+    localStorage.setItem(
+      "full_name",
+      response.data.full_name
+    )
+
+    localStorage.setItem(
+      "role",
+      response.data.role
+    )
+
+    alert("ورود با موفقیت انجام شد.")
+
+    router.push("/")
+
+  }
+
+  catch (err:any){
+
+    alert(
+      err.response?.data?.detail ??
+      "خطا در ورود"
+    )
+
+  }
+
 }
 </script>
 

@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { RouterLink } from "vue-router";
+import axios from "axios";
 
-defineProps({
+const props = defineProps({
     id: Number,
     title: String,
     year: Number,
@@ -9,7 +10,38 @@ defineProps({
     price: String,
     image: String
 });
+
+
+async function addFavorite(){
+
+    try{
+
+        const token = localStorage.getItem("token");
+
+        await axios.get(
+            `http://127.0.0.1:8000/favorites/add/${props.id}`,
+            {
+                headers:{
+                    Authorization:`Bearer ${token}`
+                }
+            }
+        );
+
+
+        alert("به علاقه‌مندی‌ها اضافه شد ❤️");
+
+
+    }catch(err){
+
+        console.error(err);
+        alert("خطا در افزودن علاقه‌مندی");
+
+    }
+
+}
+
 </script>
+
 
 <template>
 
@@ -21,6 +53,7 @@ defineProps({
         loading="lazy"
     />
 
+
     <div class="content">
 
         <h3>{{ title }}</h3>
@@ -31,6 +64,15 @@ defineProps({
 
         <h2>{{ price }}</h2>
 
+
+        <button
+            class="favorite"
+            @click="addFavorite"
+        >
+            ❤️ افزودن به علاقه‌مندی
+        </button>
+
+
         <RouterLink
             class="btn"
             :to="`/cars/${id}`"
@@ -38,11 +80,13 @@ defineProps({
             مشاهده جزئیات
         </RouterLink>
 
+
     </div>
 
 </div>
 
 </template>
+
 
 <style scoped>
 
@@ -51,59 +95,54 @@ defineProps({
     border-radius:16px;
     overflow:hidden;
     box-shadow:0 10px 25px rgba(0,0,0,.08);
-    transition:.3s;
 }
 
-.card:hover{
-    transform:translateY(-8px);
-    box-shadow:0 18px 35px rgba(0,0,0,.15);
-}
 
 img{
     width:100%;
     height:220px;
     object-fit:cover;
-    display:block;
 }
+
 
 .content{
     padding:18px;
 }
 
-h3{
-    margin:0 0 10px;
-    font-size:22px;
-    color:#222;
+
+.favorite{
+
+    width:100%;
+    padding:12px;
+    margin-bottom:12px;
+
+    border:none;
+    border-radius:10px;
+
+    background:#ef4444;
+    color:white;
+
+    font-weight:bold;
+    cursor:pointer;
+
 }
 
-p{
-    color:#666;
-    margin:8px 0;
-}
-
-h2{
-    color:#2563eb;
-    margin-top:15px;
-    margin-bottom:20px;
-    font-size:26px;
-}
 
 .btn{
+
     display:block;
     width:100%;
     text-align:center;
+
     padding:13px;
+
     background:#2563eb;
     color:#fff;
-    text-decoration:none;
-    border-radius:10px;
-    font-size:15px;
-    font-weight:bold;
-    transition:.25s;
-}
 
-.btn:hover{
-    background:#1d4ed8;
+    text-decoration:none;
+
+    border-radius:10px;
+
 }
 
 </style>

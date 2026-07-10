@@ -1,50 +1,117 @@
 <script setup lang="ts">
-import { RouterLink } from "vue-router";
+import { RouterLink, useRouter } from "vue-router";
+import { ref, onMounted } from "vue";
 import logo from "../assets/images/logo.png";
 
+const router = useRouter();
 
+const token = ref<string | null>(null);
+const fullName = ref<string | null>(null);
+
+
+function checkUser() {
+  token.value = localStorage.getItem("token");
+  fullName.value = localStorage.getItem("full_name");
+}
+
+
+onMounted(() => {
+  checkUser();
+});
+
+function logout() {
+  localStorage.removeItem("token");
+  localStorage.removeItem("full_name");
+  localStorage.removeItem("role");
+
+  token.value = null;
+  fullName.value = null;
+
+  router.push("/login");
+}
 </script>
+
 
 <template>
   <header class="navbar">
+
     <div class="container">
 
       <div class="logo">
-      <img :src="logo" alt="اتوگالری">
-    
-</div>
+        <img :src="logo" alt="اتوگالری">
+      </div>
 
-<nav class="menu">
 
-    <RouterLink to="/">
-        خانه
-    </RouterLink>
+      <nav class="menu">
 
-    <RouterLink to="/cars">
-        خودروها
-    </RouterLink>
+        <RouterLink to="/">
+          خانه
+        </RouterLink>
 
-    <RouterLink to="/favorites">
-        علاقه‌مندی‌ها
-    </RouterLink>
+        <RouterLink to="/cars">
+          خودروها
+        </RouterLink>
 
-</nav>
+        <RouterLink to="/favorites">
+          علاقه‌مندی‌ها
+        </RouterLink>
 
-<div class="auth">
+      </nav>
 
-    <RouterLink class="login" to="/login">
-        ورود
-    </RouterLink>
 
-    <RouterLink class="register" to="/register">
-        ثبت نام
-    </RouterLink>
 
-</div>
+      <div class="auth">
+
+
+        <template v-if="token">
+
+          <span class="username">
+            سلام {{ fullName }} 👋
+          </span>
+
+
+          <button
+            class="logout"
+            @click="logout"
+          >
+            خروج
+          </button>
+
+
+        </template>
+
+
+
+        <template v-else>
+
+          <RouterLink
+            class="login"
+            to="/login"
+          >
+            ورود
+          </RouterLink>
+
+
+          <RouterLink
+            class="register"
+            to="/register"
+          >
+            ثبت نام
+          </RouterLink>
+
+
+        </template>
+
+
+      </div>
+
 
     </div>
+
   </header>
 </template>
+
+
 
 <style scoped>
 
@@ -55,6 +122,7 @@ import logo from "../assets/images/logo.png";
     top:0;
     z-index:1000;
 }
+
 
 .container{
     max-width:1200px;
@@ -68,21 +136,26 @@ import logo from "../assets/images/logo.png";
     align-items:center;
 }
 
+
 .logo{
     display:flex;
     align-items:center;
 }
+
 
 .logo img{
     width:140px;
     height:auto;
 }
 
+
+
 .menu{
     display:flex;
     flex-direction:row-reverse;
     gap:35px;
 }
+
 
 .menu a{
     text-decoration:none;
@@ -91,15 +164,21 @@ import logo from "../assets/images/logo.png";
     font-weight:700;
 }
 
+
 .menu a:hover{
     color:#2563eb;
 }
+
+
 
 .auth{
     display:flex;
     flex-direction:row-reverse;
     gap:15px;
+    align-items:center;
 }
+
+
 
 .login,
 .register{
@@ -109,17 +188,47 @@ import logo from "../assets/images/logo.png";
     font-weight:bold;
 }
 
+
+
 .login{
     color:#2563eb;
 }
+
+
 
 .register{
     background:#2563eb;
     color:white;
 }
 
+
+
 .register:hover{
     background:#1d4ed8;
 }
 
+
+
+.username{
+    font-weight:bold;
+    color:#222;
+}
+
+
+
+.logout{
+    border:none;
+    background:#ef4444;
+    color:white;
+    padding:10px 20px;
+    border-radius:10px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+
+
+.logout:hover{
+    background:#dc2626;
+}
 </style>

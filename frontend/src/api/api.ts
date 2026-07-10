@@ -1,11 +1,15 @@
-const API_URL = "http://127.0.0.1:8000"
+import axios from "axios";
 
-export async function getCars() {
-    const response = await fetch(`${API_URL}/cars/api`)
 
-    if (!response.ok) {
-        throw new Error("Failed to fetch cars")
+const api = axios.create({
+
+    baseURL:"http://localhost:8000",
+
+    headers:{
+        "Content-Type":"application/json"
     }
 
-    return await response.json()
-}
+});
+
+
+export default api;

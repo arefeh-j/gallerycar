@@ -6,7 +6,11 @@ from sqlalchemy.orm import Session
 from sqlalchemy import or_
 import math
 
-from app.core.security import hash_password
+from app.core.security import (
+    hash_password,
+    verify_password,
+    create_access_token
+)
 
 from app.database import get_db
 from app.models.user import User
@@ -280,6 +284,16 @@ class RegisterRequest(BaseModel):
     phone: str
     password: str
 
+class RegisterRequest(BaseModel):
+    full_name: str
+    email: str
+    phone: str
+    password: str
+
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
 
 @router.post("/api/register")
 async def register_api(
@@ -311,4 +325,42 @@ async def register_api(
 
     return {
         "message": "User registered successfully"
+    }
+@router.post("/api/login")
+async def login_api(
+    data: LoginRequest,
+    db: Session = Depends(get_db)
+):
+
+    user = db.query(User).filter(
+        User.email == data.email
+    ).first()
+
+    if user is None:
+        raise HTTPException(
+            status_code=401,
+            detail="ایمیل یا رمز عبور اشتباه است."
+        )
+
+    if not verify_password(
+        data.password,
+        user.password
+    ):
+        raise HTTPException(
+            status_code=401,
+            detail="ایمیل یا رمز عبور اشتباه است."
+        )
+
+    token = create_access_token(
+        {
+            "sub": str(user.id),
+            "role": user.role
+        }
+    )
+
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "full_name": user.full_name,
+        "role": user.role
     }
