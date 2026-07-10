@@ -367,34 +367,11 @@ async def delete_car(
 # REST API - Cars
 # ==========================
 
-@router.get("")
-async def get_cars_api(
-    db: Session = Depends(get_db)
-):
-
-    cars = db.query(Car).all()
-
-    result = []
-
-    for car in cars:
-        result.append({
-            "id": car.id,
-            "model": car.model,
-            "year": car.year,
-            "price": float(car.price),
-            "brand": car.brand.name if car.brand else "",
-            "owner": car.owner.full_name if car.owner else ""
-        })
-
-    return result
-# ==========================
-# REST API - Cars
-# ==========================
-
 @router.get("/api")
 async def get_cars_api(
     db: Session = Depends(get_db)
 ):
+    
 
     cars = db.query(Car).all()
 
@@ -408,11 +385,91 @@ async def get_cars_api(
         }
         for car in cars
     ]
+
+
+
+@router.get("/test123")
+def test123():
+    return {"ok": True}
+print("Cars router loaded")
+
+
+@router.get("/api/admin")
+async def admin_cars(
+    db: Session = Depends(get_db)
+):
+    cars = db.query(Car).all()
+
+    return [
+        {
+            "id": car.id,
+            "brand": car.brand.name if car.brand else "",
+            "model": car.model,
+            "price": float(car.price),
+            "status": car.status
+        }
+        for car in cars
+    ]
+
+
+@router.post("/api/admin/{car_id}/approve")
+async def approve_car(
+    car_id: int,
+    db: Session = Depends(get_db)
+):
+
+    car = db.query(Car).filter(
+        Car.id == car_id
+    ).first()
+
+    if not car:
+        raise HTTPException(
+            status_code=404,
+            detail="Car not found"
+        )
+
+    car.status = "approved"
+
+    db.commit()
+
+    return {
+        "message": "approved"
+    }
+
+@router.post("/api/admin/{car_id}/reject")
+async def reject_car(
+    car_id: int,
+    db: Session = Depends(get_db)
+):
+    car = db.query(Car).filter(Car.id == car_id).first()
+    if not car:
+        raise HTTPException(status_code=404, detail="Car not found")
+    
+    car.status = "rejected"
+    db.commit()
+    return {"message": "rejected"}
+
+
+@router.delete("/api/admin/{car_id}")
+async def delete_car_api(
+    car_id: int,
+    db: Session = Depends(get_db)
+):
+    car = db.query(Car).filter(Car.id == car_id).first()
+    if not car:
+        raise HTTPException(status_code=404, detail="Car not found")
+    
+    db.delete(car)
+    db.commit()
+    return {"message": "deleted"}
+
+
 @router.get("/api/{car_id}")
 def get_car_detail(
     car_id: int,
     db: Session = Depends(get_db)
 ):
+    
 
     car = db.query(Car).filter(
         Car.id == car_id
@@ -427,6 +484,9 @@ def get_car_detail(
     return {
     "id": car.id,
     "user_id": car.user_id,
+
+    "brand": car.brand.name if car.brand else "",
+
     "model": car.model,
     "price": float(car.price),
     "color": car.color,
@@ -438,6 +498,7 @@ def get_car_detail(
     "fuel_type": car.fuel_type,
     "description": car.description,
     "created_at": car.created_at,
+    
 
     "images": [
         {
@@ -448,3 +509,7 @@ def get_car_detail(
     ]
 
 }
+
+
+
+
