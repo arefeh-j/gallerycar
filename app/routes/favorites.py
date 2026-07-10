@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.favorite import Favorite
 from app.models.car import Car
+from app.core.security import get_current_user
 
 router = APIRouter()
 
@@ -20,10 +21,13 @@ templates = Jinja2Templates(directory="app/templates")
 @router.get("/landing", response_class=HTMLResponse)
 async def favorites_landing(
     request: Request,
+    current_user=Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
 
-    favorites = db.query(Favorite).all()
+    favorites = db.query(Favorite).filter(
+        Favorite.user_id == current_user.id
+    ).all()
 
     return templates.TemplateResponse(
         request=request,
@@ -34,7 +38,6 @@ async def favorites_landing(
         }
     )
 
-
 # ==========================
 # Add Favorite
 # ==========================
@@ -42,6 +45,7 @@ async def favorites_landing(
 @router.get("/add/{car_id}")
 async def add_to_favorites(
     car_id: int,
+    current_user = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
 
@@ -54,14 +58,13 @@ async def add_to_favorites(
         )
 
     exists = db.query(Favorite).filter(
-        Favorite.user_id == car.user_id,
+        Favorite.user_id == current_user.id,
         Favorite.car_id == car_id
     ).first()
-
     if exists is None:
 
         favorite = Favorite(
-            user_id=car.user_id,
+            user_id=current_user.id,
             car_id=car_id
         )
 

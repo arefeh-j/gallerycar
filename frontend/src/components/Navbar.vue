@@ -1,36 +1,42 @@
 <script setup lang="ts">
-import { RouterLink, useRouter } from "vue-router";
-import { ref, onMounted } from "vue";
+import { RouterLink, useRouter, useRoute } from "vue-router";
+import { ref, watch } from "vue";
 import logo from "../assets/images/logo.png";
 
 const router = useRouter();
+const route = useRoute();
 
 const token = ref<string | null>(null);
 const fullName = ref<string | null>(null);
 
-
 function checkUser() {
   token.value = localStorage.getItem("token");
   fullName.value = localStorage.getItem("full_name");
+
+  console.log("TOKEN:", token.value);
+  console.log("USER:", fullName.value);
 }
 
-
-onMounted(() => {
-  checkUser();
-});
+watch(
+  () => route.fullPath,
+  () => {
+    checkUser();
+  },
+  {
+    immediate: true
+  }
+);
 
 function logout() {
   localStorage.removeItem("token");
   localStorage.removeItem("full_name");
   localStorage.removeItem("role");
 
-  token.value = null;
-  fullName.value = null;
+  checkUser();
 
   router.push("/login");
 }
 </script>
-
 
 <template>
   <header class="navbar">

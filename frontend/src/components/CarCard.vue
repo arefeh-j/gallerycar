@@ -17,6 +17,7 @@ async function addFavorite(){
     try{
 
         const token = localStorage.getItem("token");
+        console.log(localStorage.getItem("token"));
 
         await axios.get(
             `http://127.0.0.1:8000/favorites/add/${props.id}`,
