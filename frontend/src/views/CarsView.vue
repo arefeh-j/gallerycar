@@ -1,4 +1,5 @@
 <script setup lang="ts">
+
 import { ref, onMounted, watch } from "vue";
 import { useRoute } from "vue-router";
 
@@ -14,12 +15,20 @@ const loading = ref(true);
 
 
 
-async function loadCars() {
+function imageUrl(url:string){
+
+    return "http://127.0.0.1:8000" + url;
+
+}
+
+
+
+async function loadCars(){
 
     loading.value = true;
 
 
-    try {
+    try{
 
 
         const data = await getCars();
@@ -82,27 +91,32 @@ async function loadCars() {
 
 
 
-    } catch(err){
+    }catch(err){
 
         console.error(err);
 
-    } finally {
 
-        loading.value = false;
+    }finally{
+
+        loading.value=false;
 
     }
 
+
 }
+
 
 
 
 onMounted(loadCars);
 
 
+
 watch(
     ()=>route.query,
     loadCars
 );
+
 
 </script>
 
@@ -114,83 +128,89 @@ watch(
 <div class="page">
 
 
-    <h1>
-        خودروهای موجود
-    </h1>
+<h1>
+    خودروهای موجود
+</h1>
 
 
 
-    <p class="count">
+<p class="count">
 
-        تعداد خودروها:
-        {{ cars.length }}
+تعداد خودروها:
+{{ cars.length }}
 
-    </p>
-
-
-
-
-    <div
-        v-if="loading"
-        class="loading"
-    >
-
-        در حال بارگذاری...
-
-    </div>
+</p>
 
 
 
 
-    <div
-        v-else-if="cars.length === 0"
-        class="empty"
-    >
+<div
+v-if="loading"
+class="loading"
+>
 
-        خودرویی پیدا نشد.
+در حال بارگذاری...
 
-    </div>
+</div>
 
 
 
 
 
-    <div
-        v-else
-        class="grid"
-    >
+<div
+v-else-if="cars.length===0"
+class="empty"
+>
+
+🚗 خودرویی پیدا نشد.
+
+</div>
 
 
 
-        <CarCard
-
-            v-for="car in cars"
-
-            :key="car.id"
 
 
-            :id="car.id"
+<div
+v-else
+class="grid"
+>
 
 
-            :title="`${car.brand?.name ?? 'برند'} ${car.model ?? ''}`"
+<CarCard
+
+v-for="car in cars"
+
+:key="car.id"
 
 
-            :year="car.year"
+:id="car.id"
 
 
-            :mileage="car.mileage"
+:title="`${car.brand?.name ?? ''} ${car.model ?? ''}`"
 
 
-            :price="car.price"
+:year="car.year"
 
 
-            image="https://placehold.co/600x400"
-
-        />
+:mileage="car.mileage"
 
 
+:price="car.price"
 
-    </div>
+
+:image="
+car.images && car.images.length
+?
+imageUrl(car.images[0].url)
+:
+'https://placehold.co/600x400'
+"
+
+
+/>
+
+
+</div>
 
 
 
@@ -207,13 +227,13 @@ watch(
 
 .page{
 
-    max-width:1200px;
+max-width:1200px;
 
-    margin:auto;
+margin:auto;
 
-    padding:40px 20px;
+padding:40px 20px;
 
-    direction:rtl;
+direction:rtl;
 
 }
 
@@ -221,9 +241,9 @@ watch(
 
 .count{
 
-    color:#666;
+color:#666;
 
-    margin-bottom:25px;
+margin-bottom:25px;
 
 }
 
@@ -231,11 +251,11 @@ watch(
 
 .grid{
 
-    display:grid;
+display:grid;
 
-    grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
+grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
 
-    gap:25px;
+gap:25px;
 
 }
 
@@ -243,11 +263,11 @@ watch(
 
 .loading{
 
-    text-align:center;
+text-align:center;
 
-    font-size:20px;
+font-size:20px;
 
-    padding:60px;
+padding:60px;
 
 }
 
@@ -255,15 +275,16 @@ watch(
 
 .empty{
 
-    text-align:center;
+text-align:center;
 
-    padding:60px;
+padding:60px;
 
-    font-size:20px;
+font-size:20px;
 
-    color:#888;
+color:#888;
 
 }
+
 
 
 </style>
