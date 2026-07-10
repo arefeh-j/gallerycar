@@ -8,6 +8,11 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
 
+from fastapi import Depends, HTTPException
+from sqlalchemy.orm import Session
+from app.database import get_db
+from app.models.car import Car
+
 import math
 
 from app.database import get_db
@@ -403,3 +408,43 @@ async def get_cars_api(
         }
         for car in cars
     ]
+@router.get("/api/{car_id}")
+def get_car_detail(
+    car_id: int,
+    db: Session = Depends(get_db)
+):
+
+    car = db.query(Car).filter(
+        Car.id == car_id
+    ).first()
+
+    if car is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Car not found"
+        )
+
+    return {
+    "id": car.id,
+    "user_id": car.user_id,
+    "model": car.model,
+    "price": float(car.price),
+    "color": car.color,
+    "transmission": car.transmission,
+    "status": car.status,
+    "brand_id": car.brand_id,
+    "year": car.year,
+    "mileage": car.mileage,
+    "fuel_type": car.fuel_type,
+    "description": car.description,
+    "created_at": car.created_at,
+
+    "images": [
+        {
+            "id": image.id,
+            "url": image.image_url
+        }
+        for image in car.images
+    ]
+
+}

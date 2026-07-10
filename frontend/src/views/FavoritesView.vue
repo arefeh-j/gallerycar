@@ -87,9 +87,16 @@ v-for="item in favorites"
 
 
 <h2>
-{{item.car.brand?.name}}
-{{item.car.model}}
+    {{ item.car.model }}
 </h2>
+
+<p>
+    سال: {{ item.car.year }}
+</p>
+
+<p>
+    قیمت: {{ item.car.price }} $
+</p>
 
 
 <p>

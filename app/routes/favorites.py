@@ -9,6 +9,8 @@ from app.models.favorite import Favorite
 from app.models.car import Car
 from app.core.security import get_current_user
 
+from fastapi import HTTPException
+
 router = APIRouter()
 
 templates = Jinja2Templates(directory="app/templates")
@@ -102,3 +104,104 @@ async def delete_favorite(
         "/favorites/landing",
         status_code=303
     )
+
+# ==========================
+# REST API - Get Favorites
+# ==========================
+
+@router.get("/api")
+async def get_favorites(
+    current_user=Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+
+    favorites = db.query(Favorite).filter(
+        Favorite.user_id == current_user.id
+    ).all()
+
+    return [
+        {
+            "id": favorite.id,
+            "car": {
+                "id": favorite.car.id,
+                "model": favorite.car.model,
+                "price": float(favorite.car.price),
+                "year": favorite.car.year
+            }
+        }
+        for favorite in favorites
+    ]
+
+
+# ==========================
+# REST API - Add Favorite
+# ==========================
+
+@router.post("/api/{car_id}")
+async def add_favorite_api(
+    car_id: int,
+    current_user=Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+
+    car = db.query(Car).filter(
+        Car.id == car_id
+    ).first()
+
+    if car is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Car not found"
+        )
+
+    exists = db.query(Favorite).filter(
+        Favorite.user_id == current_user.id,
+        Favorite.car_id == car_id
+    ).first()
+
+    if exists:
+        return {
+            "message": "Already in favorites"
+        }
+
+    favorite = Favorite(
+        user_id=current_user.id,
+        car_id=car_id
+    )
+
+    db.add(favorite)
+    db.commit()
+
+    return {
+        "message": "Added successfully"
+    }
+
+
+# ==========================
+# REST API - Delete Favorite
+# ==========================
+
+@router.delete("/api/{favorite_id}")
+async def delete_favorite_api(
+    favorite_id: int,
+    current_user=Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+
+    favorite = db.query(Favorite).filter(
+        Favorite.id == favorite_id,
+        Favorite.user_id == current_user.id
+    ).first()
+
+    if favorite is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Favorite not found"
+        )
+
+    db.delete(favorite)
+    db.commit()
+
+    return {
+        "message": "Deleted successfully"
+    }

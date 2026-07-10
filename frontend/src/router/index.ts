@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from "vue-router";
 
 import HomeView from "../views/HomeView.vue";
 import CarsView from "../views/CarsView.vue";
-import CarDetailView from "../views/CarDetailView.vue";
+import CarDetailsView from "../views/CarDetailsView.vue";
 import AddCarView from "../views/AddCarView.vue";
 import EditCarView from "../views/EditCarView.vue";
 import LoginView from "../views/LoginView.vue";
@@ -32,19 +32,12 @@ const router = createRouter({
 
 
     {
-      path: "/cars/:id",
-      name: "car-detail",
-      component: CarDetailView,
-    },
-
-
-    {
       path: "/cars/add",
       name: "add-car",
       component: AddCarView,
       meta: {
-        requiresAuth: true,
-      },
+        requiresAuth: true
+      }
     },
 
 
@@ -53,8 +46,16 @@ const router = createRouter({
       name: "edit-car",
       component: EditCarView,
       meta: {
-        requiresAuth: true,
-      },
+        requiresAuth: true
+      }
+    },
+
+
+    // صفحه جزئیات خودرو
+    {
+      path: "/cars/:id",
+      name: "car-details",
+      component: CarDetailsView,
     },
 
 
@@ -77,8 +78,8 @@ const router = createRouter({
       name: "favorites",
       component: FavoritesView,
       meta: {
-        requiresAuth: true,
-      },
+        requiresAuth: true
+      }
     },
 
 
@@ -88,9 +89,10 @@ const router = createRouter({
       component: AdminView,
       meta: {
         requiresAuth: true,
-        requiresAdmin: true,
-      },
+        requiresAdmin: true
+      }
     },
+
 
   ],
 
@@ -102,8 +104,11 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
 
+
   const token = localStorage.getItem("token");
+
   const role = localStorage.getItem("role");
+
 
 
   if (to.meta.requiresAuth && !token) {
@@ -126,7 +131,9 @@ router.beforeEach((to, from, next) => {
 
   }
 
+
 });
+
 
 
 export default router;

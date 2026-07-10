@@ -1,23 +1,39 @@
-import api from "../api/api";
+import axios from "axios";
 
+const API = "http://127.0.0.1:8000";
 
-// گرفتن لیست علاقه مندی ها
-export async function getFavorites(){
-
-    const response = await api.get("/favorites/landing");
-
-    return response.data;
-
+function authHeader() {
+  return {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  };
 }
 
+export async function getFavorites() {
+  const response = await axios.get(
+    `${API}/favorites/api`,
+    authHeader()
+  );
 
-// حذف علاقه مندی
-export async function deleteFavorite(id:number){
+  return response.data;
+}
 
-    const response = await api.get(
-        `/favorites/delete/${id}`
-    );
+export async function addFavorite(carId: number) {
+  const response = await axios.post(
+    `${API}/favorites/api/${carId}`,
+    {},
+    authHeader()
+  );
 
-    return response.data;
+  return response.data;
+}
 
+export async function deleteFavorite(favoriteId: number) {
+  const response = await axios.delete(
+    `${API}/favorites/api/${favoriteId}`,
+    authHeader()
+  );
+
+  return response.data;
 }
