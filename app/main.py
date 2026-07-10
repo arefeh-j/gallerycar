@@ -92,3 +92,50 @@ async def root(
             "expensive": expensive,
         }
     )
+# ==========================
+# REST API - Favorite Status
+# ==========================
+
+@router.get("/api/status/{car_id}")
+async def favorite_status(
+    car_id: int,
+    current_user=Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+
+    favorite = db.query(Favorite).filter(
+        Favorite.user_id == current_user.id,
+        Favorite.car_id == car_id
+    ).first()
+
+    return {
+        "is_favorite": favorite is not None
+    }
+# ==========================
+# REST API - Delete By Car
+# ==========================
+
+@router.delete("/api/car/{car_id}")
+async def delete_by_car(
+    car_id: int,
+    current_user=Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+
+    favorite = db.query(Favorite).filter(
+        Favorite.user_id == current_user.id,
+        Favorite.car_id == car_id
+    ).first()
+
+    if favorite is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Favorite not found"
+        )
+
+    db.delete(favorite)
+    db.commit()
+
+    return {
+        "message": "Removed successfully"
+    }

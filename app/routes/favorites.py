@@ -160,9 +160,10 @@ async def add_favorite_api(
     ).first()
 
     if exists:
-        return {
-            "message": "Already in favorites"
-        }
+    raise HTTPException(
+        status_code=400,
+        detail="Car already in favorites"
+    )
 
     favorite = Favorite(
         user_id=current_user.id,
@@ -204,4 +205,64 @@ async def delete_favorite_api(
 
     return {
         "message": "Deleted successfully"
+    }
+# ==========================
+# REST API - Favorite Status
+# ==========================
+
+@router.get("/api/status/{car_id}")
+async def favorite_status(
+    car_id: int,
+    current_user=Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+
+    favorite = db.query(Favorite).filter(
+        Favorite.user_id == current_user.id,
+        Favorite.car_id == car_id
+    ).first()
+
+    return {
+        "is_favorite": favorite is not None
+    }
+
+
+@router.post("/api/{car_id}")
+async def add_favorite_api(
+    car_id: int,
+    current_user=Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+
+    car = db.query(Car).filter(
+        Car.id == car_id
+    ).first()
+
+    if car is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Car not found"
+        )
+
+    exists = db.query(Favorite).filter(
+        Favorite.user_id == current_user.id,
+        Favorite.car_id == car_id
+    ).first()
+
+    if exists:
+        raise HTTPException(
+            status_code=400,
+            detail="Car already in favorites"
+        )
+
+    favorite = Favorite(
+        user_id=current_user.id,
+        car_id=car_id
+    )
+
+    db.add(favorite)
+    db.commit()
+
+    return {
+        "message": "Added successfully"
     }
