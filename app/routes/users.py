@@ -6,8 +6,12 @@ from sqlalchemy.orm import Session
 from sqlalchemy import or_
 import math
 
+from app.core.security import hash_password
+
 from app.database import get_db
 from app.models.user import User
+
+from pydantic import BaseModel
 
 router = APIRouter()
 
@@ -122,7 +126,7 @@ async def create_user(
         full_name=name,
         email=email,
         phone=phone,
-        password=password,
+        password=hash_password(password),
         role="user"
     )
 
@@ -270,3 +274,41 @@ async def delete_user(
         "/users/landing",
         status_code=status.HTTP_303_SEE_OTHER
     )
+class RegisterRequest(BaseModel):
+    full_name: str
+    email: str
+    phone: str
+    password: str
+
+
+@router.post("/api/register")
+async def register_api(
+    data: RegisterRequest,
+    db: Session = Depends(get_db)
+):
+
+    old_user = db.query(User).filter(
+        User.email == data.email
+    ).first()
+
+    if old_user:
+        raise HTTPException(
+            status_code=400,
+            detail="Email already exists"
+        )
+
+    user = User(
+        full_name=data.full_name,
+        email=data.email,
+        phone=data.phone,
+        password=hash_password(data.password),
+        role="user"
+    )
+
+    db.add(user)
+
+    db.commit()
+
+    return {
+        "message": "User registered successfully"
+    }
