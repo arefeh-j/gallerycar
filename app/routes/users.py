@@ -371,13 +371,12 @@ async def current_user(
 ):
 
     return {
-        "id": current_user.id,
-        "full_name": current_user.full_name,
-        "email": current_user.email,
-        "phone": current_user.phone,
-        "role": current_user.role
-    }
-
+    "id": current_user.id,
+    "full_name": current_user.full_name,
+    "email": current_user.email,
+    "phone": current_user.phone,
+    "role": current_user.role
+}
 
 
 # ==========================
@@ -386,13 +385,15 @@ async def current_user(
 
 from app.core.security import get_current_user
 
-
 @router.put("/api/me")
 async def update_profile(
     data: UserUpdate,
-    current_user = Depends(get_current_user),
+    current_user=Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
+
+    print("DATA:", data.model_dump())
+    print("BEFORE:", current_user.full_name)
 
     if data.full_name:
         current_user.full_name = data.full_name
@@ -408,6 +409,8 @@ async def update_profile(
 
     db.commit()
     db.refresh(current_user)
+
+    print("AFTER:", current_user.full_name)
 
     return {
         "message": "پروفایل با موفقیت بروزرسانی شد.",
