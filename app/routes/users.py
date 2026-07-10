@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import or_
 import math
 
+from app.schemas.user import UserUpdate
 from app.core.security import (
     hash_password,
     verify_password,
@@ -14,8 +15,9 @@ from app.core.security import (
 
 from app.database import get_db
 from app.models.user import User
-
+from app.core.security import get_current_user
 from pydantic import BaseModel
+
 
 router = APIRouter()
 
@@ -207,7 +209,7 @@ async def update_user(
     user.full_name = name
     user.email = email
     user.phone = phone
-    user.password = password
+    user.password = hash_password(password)
 
     db.commit()
 
@@ -278,12 +280,6 @@ async def delete_user(
         "/users/landing",
         status_code=status.HTTP_303_SEE_OTHER
     )
-class RegisterRequest(BaseModel):
-    full_name: str
-    email: str
-    phone: str
-    password: str
-
 class RegisterRequest(BaseModel):
     full_name: str
     email: str
@@ -363,4 +359,62 @@ async def login_api(
         "token_type": "bearer",
         "full_name": user.full_name,
         "role": user.role
+    }
+
+# ==========================
+# Current User API
+# ==========================
+
+@router.get("/api/me")
+async def current_user(
+    current_user = Depends(get_current_user)
+):
+
+    return {
+        "id": current_user.id,
+        "full_name": current_user.full_name,
+        "email": current_user.email,
+        "phone": current_user.phone,
+        "role": current_user.role
+    }
+
+
+
+# ==========================
+# Current User API
+# ==========================
+
+from app.core.security import get_current_user
+
+
+@router.put("/api/me")
+async def update_profile(
+    data: UserUpdate,
+    current_user = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+
+    if data.full_name:
+        current_user.full_name = data.full_name
+
+    if data.email:
+        current_user.email = data.email
+
+    if data.phone:
+        current_user.phone = data.phone
+
+    if data.password:
+        current_user.password = hash_password(data.password)
+
+    db.commit()
+    db.refresh(current_user)
+
+    return {
+        "message": "پروفایل با موفقیت بروزرسانی شد.",
+        "user": {
+            "id": current_user.id,
+            "full_name": current_user.full_name,
+            "email": current_user.email,
+            "phone": current_user.phone
+        }
     }

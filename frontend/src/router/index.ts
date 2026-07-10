@@ -10,12 +10,22 @@ import RegisterView from "../views/RegisterView.vue";
 import FavoritesView from "../views/FavoritesView.vue";
 import AdminView from "../views/AdminView.vue";
 
+import ProfileView from "../views/ProfileView.vue";
 
 const router = createRouter({
 
   history: createWebHistory(),
 
   routes: [
+
+    {
+    path: "/profile",
+    name: "profile",
+    component: ProfileView,
+    meta:{
+        requiresAuth:true
+    }
+    },
 
     {
       path: "/",

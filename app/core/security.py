@@ -82,6 +82,18 @@ def get_current_user(
     db: Session = Depends(get_db)
 ):
 
+    print("TOKEN =", token)
+
+    payload = decode_token(token)
+
+    print("PAYLOAD =", payload)
+
+    if payload is None:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid Token"
+        )
+    
     payload = decode_token(token)
     print("TOKEN =", token)
     print("PAYLOAD =", payload)

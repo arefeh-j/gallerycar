@@ -11,6 +11,13 @@ class UserCreate(UserBase):
     password: str
 
 
+class UserUpdate(BaseModel):
+    full_name: str | None = None
+    email: str | None = None
+    phone: str | None = None
+    password: str | None = None
+
+
 class UserRead(UserBase):
     id: int
 
