@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, String, Enum, TIMESTAMP
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 
-from app.database import Base
+from app.database.database import Base
 
 
 class User(Base):

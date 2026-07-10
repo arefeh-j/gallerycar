@@ -1,11 +1,12 @@
 from sqlalchemy import Column, Integer, String, Enum
+from sqlalchemy.orm import relationship
+
 from app.database.database import Base
 
 
 class User(Base):
 
     __tablename__ = "users"
-
 
     id = Column(
         Integer,
@@ -39,4 +40,15 @@ class User(Base):
             "user"
         ),
         default="user"
+    )
+
+    # روابط
+    cars = relationship(
+        "Car",
+        back_populates="owner"
+    )
+
+    favorites = relationship(
+        "Favorite",
+        back_populates="user"
     )

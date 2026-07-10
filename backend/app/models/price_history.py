@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, ForeignKey, DECIMAL, TIMESTAMP
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 
-from app.database import Base
+from app.database.database import Base
 
 
 class PriceHistory(Base):
