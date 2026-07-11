@@ -1,203 +1,460 @@
 <script setup lang="ts">
+
 import { RouterLink, useRouter, useRoute } from "vue-router";
 import { ref, watch } from "vue";
+import { useToast } from "vue-toastification";
+
 import logo from "../assets/images/logo.png";
+
 
 const router = useRouter();
 const route = useRoute();
+const toast = useToast();
+
 
 const token = ref<string | null>(null);
 const fullName = ref<string | null>(null);
 
+const menuOpen = ref(false);
+
+
+
+function toggleMenu() {
+
+  menuOpen.value = !menuOpen.value;
+
+}
+
+
+
 function checkUser() {
+
   token.value = localStorage.getItem("token");
   fullName.value = localStorage.getItem("full_name");
+
 }
+
+
 
 watch(
   () => route.fullPath,
   () => {
+
     checkUser();
+
+    menuOpen.value = false;
+
   },
   {
-    immediate: true
+    immediate:true,
   }
 );
 
-function logout() {
+
+
+function logout(){
+
   localStorage.removeItem("token");
   localStorage.removeItem("full_name");
   localStorage.removeItem("role");
 
+
   checkUser();
 
+
+  toast.success(
+    "با موفقیت خارج شدید.",
+    {
+      timeout:3000
+    }
+  );
+
+
   router.push("/login");
+
 }
+
+
+
+
+function goFavorites(){
+
+
+  if(!token.value){
+
+
+    toast.error(
+      "برای مشاهده علاقه‌مندی‌ها ابتدا وارد حساب کاربری شوید یا ثبت‌نام کنید.",
+      {
+        timeout:3000
+      }
+    );
+
+
+    router.push("/login");
+
+
+    return;
+
+  }
+
+
+
+  router.push("/favorites");
+
+
+}
+
+
+
 </script>
 
+
+
 <template>
-  <header class="navbar">
-    <div class="container">
 
-      <div class="logo">
-        <img :src="logo" alt="اتوگالری">
-      </div>
+<header class="navbar">
 
-      <nav class="menu">
-        <RouterLink to="/">خانه</RouterLink>
-        <RouterLink to="/cars">خودروها</RouterLink>
-        <RouterLink to="/favorites">علاقه‌مندی‌ها</RouterLink>
-      </nav>
 
-      <div class="auth">
+<div class="container">
 
-        <template v-if="token">
 
-          <span class="username">
-            👋 سلام {{ fullName }}
-          </span>
 
-          <RouterLink
-            class="profile"
-            to="/profile"
-          >
-            ویرایش اطلاعات
-          </RouterLink>
+<!-- Logo -->
 
-          <button
-            class="logout"
-            @click="logout"
-          >
-            خروج
-          </button>
+<div class="logo">
 
-        </template>
+<RouterLink to="/">
 
-        <template v-else>
+<img
+:src="logo"
+alt="اتوگالری"
+/>
 
-          <RouterLink
-            class="login"
-            to="/login"
-          >
-            ورود
-          </RouterLink>
+</RouterLink>
 
-          <RouterLink
-            class="register"
-            to="/register"
-          >
-            ثبت نام
-          </RouterLink>
+</div>
 
-        </template>
 
-      </div>
 
-    </div>
-  </header>
+
+
+<!-- Mobile Button -->
+
+<button
+class="menu-toggle"
+@click="toggleMenu"
+>
+
+☰
+
+</button>
+
+
+
+
+
+
+<!-- Menu -->
+
+<nav
+class="menu"
+:class="{open:menuOpen}"
+>
+
+
+
+<RouterLink to="/">
+
+🏠 خانه
+
+</RouterLink>
+
+
+
+
+<RouterLink to="/cars">
+
+🚘 خودروها
+
+</RouterLink>
+
+
+
+
+<RouterLink to="/cars">
+
+⭐ خودروهای ویژه
+
+</RouterLink>
+
+
+
+
+<a
+href="#"
+@click.prevent="goFavorites"
+>
+
+❤️ علاقه‌مندی‌ها
+
+</a>
+
+
+
+</nav>
+
+
+
+
+
+
+
+<!-- Auth -->
+
+<div class="auth">
+
+
+
+<template v-if="token">
+
+
+
+<span class="username">
+
+👋 سلام {{ fullName }}
+
+</span>
+
+
+
+
+<RouterLink
+class="profile"
+to="/profile"
+>
+
+👤 پروفایل
+
+</RouterLink>
+
+
+
+
+<button
+class="logout"
+@click="logout"
+>
+
+🚪 خروج
+
+</button>
+
+
+
 </template>
+
+
+
+
+
+
+<template v-else>
+
+
+
+<RouterLink
+class="login"
+to="/login"
+>
+
+ورود
+
+</RouterLink>
+
+
+
+<RouterLink
+class="register"
+to="/register"
+>
+
+ثبت نام
+
+</RouterLink>
+
+
+
+</template>
+
+
+
+
+</div>
+
+
+
+
+</div>
+
+
+</header>
+
+
+</template>
+
+
+
+
 
 <style scoped>
 
+/* CSS قبلی خودت بدون تغییر باقی بماند */
+
 .navbar{
-    background:#fff;
-    border-bottom:1px solid #e5e5e5;
+    background:#ffffff;
+    border-bottom:1px solid #e5e7eb;
     position:sticky;
     top:0;
     z-index:1000;
+    box-shadow:0 2px 10px rgba(0,0,0,.05);
 }
 
 .container{
     max-width:1200px;
     margin:auto;
-    padding:18px 25px;
+    padding:16px 24px;
     display:flex;
     flex-direction:row-reverse;
     justify-content:space-between;
     align-items:center;
 }
 
-.logo{
-    display:flex;
-    align-items:center;
-}
-
 .logo img{
-    width:140px;
-    height:auto;
+    width:135px;
 }
 
 .menu{
     display:flex;
     flex-direction:row-reverse;
-    gap:35px;
+    gap:30px;
+    align-items:center;
 }
 
 .menu a{
     text-decoration:none;
-    color:#222;
-    font-size:17px;
+    color:#1f2937;
+    font-size:16px;
     font-weight:700;
+    cursor:pointer;
 }
+
 
 .menu a:hover{
     color:#2563eb;
 }
 
+
 .auth{
     display:flex;
-    flex-direction:row-reverse;
-    gap:12px;
     align-items:center;
+    gap:12px;
 }
+
+
+.username{
+    font-weight:bold;
+}
+
 
 .login,
 .register,
 .profile{
-    text-decoration:none;
-    padding:10px 18px;
-    border-radius:10px;
-    font-weight:bold;
+
+text-decoration:none;
+padding:10px 18px;
+border-radius:10px;
+
 }
+
+
 
 .login{
-    color:#2563eb;
+color:#2563eb;
 }
+
 
 .register{
-    background:#2563eb;
-    color:white;
+
+background:#2563eb;
+color:white;
+
 }
 
-.register:hover{
-    background:#1d4ed8;
-}
 
 .profile{
-    background:#10b981;
-    color:white;
+
+background:#10b981;
+color:white;
+
 }
 
-.profile:hover{
-    background:#059669;
-}
-
-.username{
-    font-weight:bold;
-    color:#222;
-}
 
 .logout{
-    border:none;
-    background:#ef4444;
-    color:white;
-    padding:10px 18px;
-    border-radius:10px;
-    cursor:pointer;
-    font-weight:bold;
+
+border:none;
+background:#ef4444;
+color:white;
+padding:10px 18px;
+border-radius:10px;
+cursor:pointer;
+
 }
 
-.logout:hover{
-    background:#dc2626;
+
+
+.menu-toggle{
+
+display:none;
+
 }
+
+
+
+@media(max-width:768px){
+
+
+.menu-toggle{
+
+display:block;
+
+}
+
+
+.menu{
+
+display:none;
+width:100%;
+flex-direction:column;
+
+}
+
+
+.menu.open{
+
+display:flex;
+
+}
+
+
+.auth{
+
+flex-wrap:wrap;
+justify-content:center;
+
+}
+
+
+}
+
 </style>
