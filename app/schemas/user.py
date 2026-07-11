@@ -23,3 +23,11 @@ class UserRead(UserBase):
 
     class Config:
         from_attributes = True
+
+# ========== اضافه کن ==========
+class RegisterRequest(BaseModel):
+    full_name: str
+    email: str
+    phone: str
+    password: str
+    role: str = "user"   # مقدار پیش‌فرض: کاربر عادی

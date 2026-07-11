@@ -1,243 +1,243 @@
 <template>
-  <div class="container">
-    <h1>مدیریت خودروها</h1>
+  <div class="dashboard">
 
-    <div v-if="loading" class="loading">در حال بارگذاری...</div>
+    <h1>داشبورد مدیریت</h1>
 
-    <table v-else>
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>برند</th>
-          <th>مدل</th>
-          <th>قیمت (تومان)</th>
-          <th>وضعیت</th>
-          <th>عملیات</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="car in cars" :key="car.id">
-          <td>{{ car.id }}</td>
-          <td>{{ car.brand }}</td>
-          <td>{{ car.model }}</td>
-          <td>{{ car.price.toLocaleString() }}</td>
-          <td>
-            <span :class="statusClass(car.status)">
-              {{ statusText(car.status) }}
-            </span>
-          </td>
-          <td>
-            <button 
-              v-if="car.status === 'pending'" 
-              @click="approveCar(car.id)"
-              class="btn approve"
-            >
-              تأیید
-            </button>
-            <button 
-              v-if="car.status === 'pending' || car.status === 'approved'" 
-              @click="rejectCar(car.id)"
-              class="btn reject"
-            >
-              رد
-            </button>
-            <button 
-              @click="deleteCar(car.id)"
-              class="btn delete"
-            >
-              حذف
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <div v-if="loading" class="loading">
+      در حال دریافت اطلاعات...
+    </div>
+
+    <div v-else class="cards">
+
+      <div class="card blue">
+        <h2>{{ stats.cars }}</h2>
+        <p>کل خودروها</p>
+      </div>
+
+      <div class="card green">
+        <h2>{{ stats.orders }}</h2>
+        <p>سفارش‌ها</p>
+      </div>
+
+      <div class="card orange">
+        <h2>{{ stats.users }}</h2>
+        <p>کاربران</p>
+      </div>
+
+      <div class="card purple">
+        <h2>{{ stats.brands }}</h2>
+        <p>برندها</p>
+      </div>
+
+    </div>
+
+    <div class="actions">
+
+      <RouterLink
+        to="/admin/cars"
+        class="btn"
+      >
+        مدیریت آگهی‌ها
+      </RouterLink>
+
+      <RouterLink
+        to="/admin/orders"
+        class="btn"
+      >
+        سفارش‌های خرید
+      </RouterLink>
+
+      <RouterLink
+        to="/admin/brands"
+        class="btn"
+      >
+        مدیریت برندها
+      </RouterLink>
+
+      <RouterLink
+        to="/cars/add"
+        class="btn primary"
+      >
+        ثبت آگهی جدید
+      </RouterLink>
+
+    </div>
+
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+
+import {ref,onMounted} from "vue";
 import axios from "axios";
 
-const cars = ref<any[]>([]);
 const loading = ref(true);
 
-// توابع کمکی برای نمایش وضعیت
-const statusText = (status: string) => {
-  const map: Record<string, string> = {
-    pending: "در انتظار",
-    approved: "تأیید شده",
-    rejected: "رد شده"
-  };
-  return map[status] || status;
-};
+const stats = ref({
+    cars:0,
+    users:0,
+    brands:0,
+    orders:0
+});
 
-const statusClass = (status: string) => {
-  return {
-    "status-pending": status === "pending",
-    "status-approved": status === "approved",
-    "status-rejected": status === "rejected"
-  };
-};
+async function loadDashboard(){
 
-// بارگذاری خودروها با هدر Authorization
-async function loadCars() {
-  loading.value = true;
-  try {
-    const token = localStorage.getItem("token");
-    const response = await axios.get(
-      "http://127.0.0.1:8000/cars/api/admin",
-      {
-        headers: { Authorization: `Bearer ${token}` }
-      }
-    );
-    cars.value = response.data;
-  } catch (error) {
-    console.error(error);
-    alert("خطا در دریافت لیست خودروها");
-  } finally {
-    loading.value = false;
-  }
+    try{
+
+        const token = localStorage.getItem("token");
+
+        const res = await axios.get(
+            "http://127.0.0.1:8000/admin/api/dashboard",
+            {
+                headers:{
+                    Authorization:`Bearer ${token}`
+                }
+            }
+        );
+
+        stats.value = res.data;
+
+    }catch(err){
+
+        console.log(err);
+
+        alert("خطا در دریافت اطلاعات داشبورد");
+
+    }finally{
+
+        loading.value=false;
+
+    }
+
 }
 
-// تأیید خودرو
-async function approveCar(id: number) {
-  try {
-    const token = localStorage.getItem("token");
-    await axios.post(
-      `http://127.0.0.1:8000/cars/api/admin/${id}/approve`,
-      {},
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    await loadCars();
-    alert("خودرو تأیید شد.");
-  } catch (error) {
-    console.error(error);
-    alert("خطا در تأیید خودرو");
-  }
-}
+onMounted(loadDashboard);
 
-// رد خودرو
-async function rejectCar(id: number) {
-  try {
-    const token = localStorage.getItem("token");
-    await axios.post(
-      `http://127.0.0.1:8000/cars/api/admin/${id}/reject`,
-      {},
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    await loadCars();
-    alert("خودرو رد شد.");
-  } catch (error) {
-    console.error(error);
-    alert("خطا در رد خودرو");
-  }
-}
-
-// حذف خودرو
-async function deleteCar(id: number) {
-  if (!confirm("آیا از حذف این خودرو اطمینان دارید؟")) return;
-  try {
-    const token = localStorage.getItem("token");
-    await axios.delete(
-      `http://127.0.0.1:8000/cars/api/admin/${id}`,
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    await loadCars();
-    alert("خودرو حذف شد.");
-  } catch (error) {
-    console.error(error);
-    alert("خطا در حذف خودرو");
-  }
-}
-
-onMounted(loadCars);
 </script>
 
 <style scoped>
-.container {
-  width: 95%;
-  margin: 30px auto;
-  font-family: Vazir, sans-serif;
-  direction: rtl;
+
+.dashboard{
+
+max-width:1200px;
+margin:auto;
+padding:40px;
+direction:rtl;
+
 }
 
-h1 {
-  text-align: center;
-  margin-bottom: 30px;
+h1{
+
+text-align:center;
+margin-bottom:35px;
+
 }
 
-.loading {
-  text-align: center;
-  padding: 40px;
-  font-size: 18px;
-  color: #555;
+.loading{
+
+text-align:center;
+padding:50px;
+
 }
 
-table {
-  width: 100%;
-  border-collapse: collapse;
-  background: #fff;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+.cards{
+
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:25px;
+margin-bottom:40px;
+
 }
 
-th {
-  background: #f8f9fa;
-  font-weight: 700;
-  padding: 14px;
-  border-bottom: 2px solid #e9ecef;
+.card{
+
+padding:30px;
+border-radius:18px;
+color:white;
+text-align:center;
+box-shadow:0 10px 25px rgba(0,0,0,.08);
+
 }
 
-td {
-  padding: 12px 14px;
-  border-bottom: 1px solid #f1f3f5;
-  text-align: center;
+.card h2{
+
+font-size:42px;
+margin-bottom:10px;
+
 }
 
-.btn {
-  padding: 6px 14px;
-  border: none;
-  border-radius: 6px;
-  font-size: 13px;
-  cursor: pointer;
-  margin: 0 4px;
-  transition: all 0.2s;
-  color: #fff;
+.card p{
+
+font-size:18px;
+
 }
 
-.btn.approve {
-  background: #28a745;
-}
-.btn.approve:hover {
-  background: #218838;
+.blue{
+
+background:#2563eb;
+
 }
 
-.btn.reject {
-  background: #ffc107;
-  color: #212529;
-}
-.btn.reject:hover {
-  background: #e0a800;
+.green{
+
+background:#10b981;
+
 }
 
-.btn.delete {
-  background: #dc3545;
-}
-.btn.delete:hover {
-  background: #c82333;
+.orange{
+
+background:#f59e0b;
+
 }
 
-.status-pending {
-  color: #ff9f00;
-  font-weight: 600;
+.purple{
+
+background:#8b5cf6;
+
 }
-.status-approved {
-  color: #28a745;
-  font-weight: 600;
+
+.actions{
+
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:20px;
+
 }
-.status-rejected {
-  color: #dc3545;
-  font-weight: 600;
+
+.btn{
+
+background:white;
+padding:18px;
+border-radius:14px;
+text-decoration:none;
+text-align:center;
+font-size:17px;
+color:#333;
+box-shadow:0 5px 15px rgba(0,0,0,.08);
+
 }
+
+.primary{
+
+background:#2563eb;
+color:white;
+
+}
+
+@media(max-width:900px){
+
+.cards{
+
+grid-template-columns:repeat(2,1fr);
+
+}
+
+.actions{
+
+grid-template-columns:1fr;
+
+}
+
+}
+
 </style>

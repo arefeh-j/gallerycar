@@ -58,6 +58,52 @@ async function addToFavorites() {
 }
 
 
+
+
+async function orderCar() {
+
+    try {
+
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+
+            alert("ابتدا وارد حساب کاربری شوید.");
+
+            router.push("/login");
+
+            return;
+
+        }
+
+        await axios.post(
+            "http://127.0.0.1:8000/orders/api",
+            {
+                car_id: Number(id)
+            },
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            }
+        );
+
+        alert("✅ درخواست خرید با موفقیت ثبت شد.");
+
+    } catch (error: any) {
+
+        console.log(error);
+
+        alert(
+            error.response?.data?.detail ||
+            "خطا در ثبت درخواست خرید"
+        );
+
+    }
+
+}
+
+
 function goBack() {
 
     router.back();
@@ -165,6 +211,17 @@ function goBack() {
                 ❤️ افزودن به علاقه‌مندی
 
             </button>
+
+            <button
+    class="buy"
+    @click="orderCar"
+>
+
+🛒 ثبت درخواست خرید
+
+</button>
+
+
 
         </div>
 
@@ -277,6 +334,38 @@ grid-template-columns:1fr;
 height:300px;
 
 }
+
+}
+
+
+
+.buy{
+
+width:100%;
+
+margin-top:15px;
+
+padding:16px;
+
+background:#16a34a;
+
+color:white;
+
+border:none;
+
+border-radius:12px;
+
+font-size:17px;
+
+cursor:pointer;
+
+transition:.3s;
+
+}
+
+.buy:hover{
+
+background:#15803d;
 
 }
 

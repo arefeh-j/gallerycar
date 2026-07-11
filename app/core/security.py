@@ -28,7 +28,7 @@ SECRET_KEY = "gallerycar_secret_key_2026"
 
 ALGORITHM = "HS256"
 
-ACCESS_TOKEN_EXPIRE_MINUTES = 60
+ACCESS_TOKEN_EXPIRE_MINUTES = 43200
 
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl="/users/api/login"
@@ -81,21 +81,8 @@ def get_current_user(
     token: str = Depends(oauth2_scheme),
     db: Session = Depends(get_db)
 ):
-
     print("TOKEN =", token)
-
     payload = decode_token(token)
-
-    print("PAYLOAD =", payload)
-
-    if payload is None:
-        raise HTTPException(
-            status_code=401,
-            detail="Invalid Token"
-        )
-    
-    payload = decode_token(token)
-    print("TOKEN =", token)
     print("PAYLOAD =", payload)
 
     if payload is None:
@@ -105,10 +92,7 @@ def get_current_user(
         )
 
     user_id = payload.get("sub")
-
-    user = db.query(User).filter(
-        User.id == int(user_id)
-    ).first()
+    user = db.query(User).filter(User.id == int(user_id)).first()
 
     if user is None:
         raise HTTPException(

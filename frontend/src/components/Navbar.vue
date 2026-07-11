@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { RouterLink, useRouter, useRoute } from "vue-router";
-import { ref, watch } from "vue";
+import { ref, watch, computed } from "vue";
 import logo from "../assets/images/logo.png";
 
 const router = useRouter();
@@ -8,29 +8,30 @@ const route = useRoute();
 
 const token = ref<string | null>(null);
 const fullName = ref<string | null>(null);
+const role = ref<string | null>(null);
 
 function checkUser() {
   token.value = localStorage.getItem("token");
   fullName.value = localStorage.getItem("full_name");
+  role.value = localStorage.getItem("role");
 }
+
+const isAdmin = computed(() => role.value === "admin");
+const isLoggedIn = computed(() => !!token.value);
 
 watch(
   () => route.fullPath,
   () => {
     checkUser();
   },
-  {
-    immediate: true
-  }
+  { immediate: true }
 );
 
 function logout() {
   localStorage.removeItem("token");
   localStorage.removeItem("full_name");
   localStorage.removeItem("role");
-
   checkUser();
-
   router.push("/login");
 }
 </script>
@@ -38,166 +39,201 @@ function logout() {
 <template>
   <header class="navbar">
     <div class="container">
-
+      <!-- لوگو -->
       <div class="logo">
-        <img :src="logo" alt="اتوگالری">
+        <img :src="logo" alt="اتوگالری" />
       </div>
 
+      <!-- منوی اصلی -->
       <nav class="menu">
-        <RouterLink to="/">خانه</RouterLink>
-        <RouterLink to="/cars">خودروها</RouterLink>
-        <RouterLink to="/favorites">علاقه‌مندی‌ها</RouterLink>
+        <RouterLink to="/" class="menu-link">خانه</RouterLink>
+        <RouterLink to="/cars" class="menu-link">خودروها</RouterLink>
+
+        <template v-if="isAdmin">
+
+  <RouterLink to="/admin" class="menu-link admin">
+    داشبورد
+  </RouterLink>
+
+  <RouterLink to="/admin/cars" class="menu-link admin">
+    آگهی‌های من
+  </RouterLink>
+
+  <RouterLink to="/cars/add" class="menu-link add">
+    ثبت آگهی
+  </RouterLink>
+
+  <RouterLink to="/admin/orders" class="menu-link admin">
+    سفارش‌های خرید
+  </RouterLink>
+
+  <RouterLink to="/admin/brands" class="menu-link admin">
+    برندها
+  </RouterLink>
+
+</template>
+
+        <!-- لینک علاقه‌مندی‌ها (فقط برای کاربر عادی) -->
+        <RouterLink
+          v-if="isLoggedIn && !isAdmin"
+          to="/favorites"
+          class="menu-link"
+        >
+          علاقه‌مندی‌ها
+        </RouterLink>
       </nav>
 
+      <!-- بخش احراز هویت -->
       <div class="auth">
-
-        <template v-if="token">
-
-          <span class="username">
-            👋 سلام {{ fullName }}
-          </span>
-
-          <RouterLink
-            class="profile"
-            to="/profile"
-          >
-            ویرایش اطلاعات
-          </RouterLink>
-
-          <button
-            class="logout"
-            @click="logout"
-          >
-            خروج
-          </button>
-
+        <template v-if="isLoggedIn">
+          <span class="username">👋 {{ fullName }}</span>
+          <RouterLink to="/profile" class="btn-profile">پروفایل</RouterLink>
+          <button class="btn-logout" @click="logout">خروج</button>
         </template>
-
         <template v-else>
-
-          <RouterLink
-            class="login"
-            to="/login"
-          >
-            ورود
-          </RouterLink>
-
-          <RouterLink
-            class="register"
-            to="/register"
-          >
-            ثبت نام
-          </RouterLink>
-
+          <RouterLink to="/login" class="btn-login">ورود</RouterLink>
+          <RouterLink to="/register" class="btn-register">ثبت‌نام</RouterLink>
         </template>
-
       </div>
-
     </div>
   </header>
 </template>
 
 <style scoped>
-
-.navbar{
-    background:#fff;
-    border-bottom:1px solid #e5e5e5;
-    position:sticky;
-    top:0;
-    z-index:1000;
+/* ---- reset & base ---- */
+.navbar {
+  background: #ffffff;
+  border-bottom: 1px solid #e9ecef;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
-.container{
-    max-width:1200px;
-    margin:auto;
-    padding:18px 25px;
-    display:flex;
-    flex-direction:row-reverse;
-    justify-content:space-between;
-    align-items:center;
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  direction: rtl;
 }
 
-.logo{
-    display:flex;
-    align-items:center;
+/* ---- لوگو ---- */
+.logo img {
+  height: 200px;
+  width: auto;
+  display: block;
 }
 
-.logo img{
-    width:140px;
-    height:auto;
+/* ---- منو ---- */
+.menu {
+  display: flex;
+  align-items: center;
+  gap: 28px;
 }
 
-.menu{
-    display:flex;
-    flex-direction:row-reverse;
-    gap:35px;
+.menu-link {
+  text-decoration: none;
+  color: #334155;
+  font-size: 16px;
+  font-weight: 500;
+  padding: 6px 0;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
 }
 
-.menu a{
-    text-decoration:none;
-    color:#222;
-    font-size:17px;
-    font-weight:700;
+.menu-link:hover {
+  color: #1e293b;
+  border-bottom-color: #2563eb;
 }
 
-.menu a:hover{
-    color:#2563eb;
+.menu-link.router-link-active {
+  color: #2563eb;
+  border-bottom-color: #2563eb;
 }
 
-.auth{
-    display:flex;
-    flex-direction:row-reverse;
-    gap:12px;
-    align-items:center;
+/* لینک‌های ادمین – فقط یک رنگ ملایم متفاوت */
+.menu-link.admin {
+  color: #1e40af;
 }
 
-.login,
-.register,
-.profile{
-    text-decoration:none;
-    padding:10px 18px;
-    border-radius:10px;
-    font-weight:bold;
+.menu-link.admin:hover {
+  color: #1e3a8a;
+  border-bottom-color: #3b82f6;
 }
 
-.login{
-    color:#2563eb;
+.menu-link.add {
+  color: #16a34a;
 }
 
-.register{
-    background:#2563eb;
-    color:white;
+.menu-link.add:hover {
+  color: #15803d;
+  border-bottom-color: #22c55e;
 }
 
-.register:hover{
-    background:#1d4ed8;
+/* ---- بخش احراز هویت ---- */
+.auth {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
-.profile{
-    background:#10b981;
-    color:white;
+.username {
+  font-weight: 500;
+  color: #1e293b;
+  font-size: 15px;
 }
 
-.profile:hover{
-    background:#059669;
+/* دکمه‌ها */
+.btn-profile,
+.btn-logout,
+.btn-login,
+.btn-register {
+  text-decoration: none;
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
 }
 
-.username{
-    font-weight:bold;
-    color:#222;
+.btn-profile {
+  background: #f1f5f9;
+  color: #1e293b;
 }
 
-.logout{
-    border:none;
-    background:#ef4444;
-    color:white;
-    padding:10px 18px;
-    border-radius:10px;
-    cursor:pointer;
-    font-weight:bold;
+.btn-profile:hover {
+  background: #e2e8f0;
 }
 
-.logout:hover{
-    background:#dc2626;
+.btn-logout {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.btn-logout:hover {
+  background: #fee2e2;
+}
+
+.btn-login {
+  background: transparent;
+  color: #2563eb;
+}
+
+.btn-login:hover {
+  background: #eff6ff;
+}
+
+.btn-register {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.btn-register:hover {
+  background: #1d4ed8;
 }
 </style>

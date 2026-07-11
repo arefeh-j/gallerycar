@@ -280,11 +280,16 @@ async def delete_user(
         "/users/landing",
         status_code=status.HTTP_303_SEE_OTHER
     )
+
+# ========================
+# تغییرات اعمال شده در کلاس RegisterRequest و تابع register_api
+# ========================
 class RegisterRequest(BaseModel):
     full_name: str
     email: str
     phone: str
     password: str
+    role: str = "user"   # اضافه شده با مقدار پیش‌فرض
 
 
 class LoginRequest(BaseModel):
@@ -307,12 +312,19 @@ async def register_api(
             detail="Email already exists"
         )
 
+    # اضافه شده: اعتبارسنجی نقش (اختیاری)
+    if data.role not in ["user", "admin"]:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid role. Must be 'user' or 'admin'"
+        )
+
     user = User(
         full_name=data.full_name,
         email=data.email,
         phone=data.phone,
         password=hash_password(data.password),
-        role="user"
+        role=data.role   # تغییر یافته: از داده ورودی استفاده می‌کند
     )
 
     db.add(user)
@@ -322,6 +334,7 @@ async def register_api(
     return {
         "message": "User registered successfully"
     }
+
 @router.post("/api/login")
 async def login_api(
     data: LoginRequest,
