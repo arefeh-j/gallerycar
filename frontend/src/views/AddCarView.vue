@@ -42,7 +42,6 @@ async function loadBrands() {
     brands.value = res.data;
   } catch (err) {
     console.error(err);
-
     toast.error("خطا در دریافت برندها");
   }
 }
@@ -56,7 +55,6 @@ function handleFileUpload(event: Event) {
 
   if (imageFiles.value.length + files.length > 5) {
     toast.warning("حداکثر ۵ تصویر مجاز است.");
-
     return;
   }
 
@@ -88,7 +86,6 @@ async function submitForm() {
     !form.value.price
   ) {
     toast.error("لطفاً فیلدهای الزامی را تکمیل کنید.");
-
     return;
   }
 
@@ -151,10 +148,13 @@ async function submitForm() {
     console.error(err);
 
     toast.error(
-       typeof err.response?.data?.detail === "string"
-       ? err.response.data.detail
-       "خطا در ثبت خودرو"
-  );
+      typeof err.response?.data?.detail === "string"
+        ? err.response.data.detail
+        : "خطا در ثبت خودرو",
+      {
+        timeout: 3000,
+      }
+    );
   } finally {
     loading.value = false;
   }

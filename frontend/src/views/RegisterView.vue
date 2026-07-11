@@ -50,7 +50,7 @@
               class="toggle"
               @click="showPassword = !showPassword"
             >
-              {{ showPassword ? "🙈" : "👁" }}
+              {{ showConfirmPassword ? "🙈" : "👁" }}
             </button>
           </div>
           <small class="error-text" v-if="passwordError">
@@ -79,7 +79,7 @@
           </small>
         </div>
 
-        <!-- ===== بخش جدید: انتخاب نقش ===== -->
+        <!-- انتخاب نقش (از HEAD) -->
         <div class="form-group role-group">
           <label>ثبت‌نام به عنوان</label>
           <div class="role-options">
@@ -124,7 +124,7 @@ const email = ref("");
 const phone = ref("");
 const password = ref("");
 const confirmPassword = ref("");
-const role = ref("user"); // مقدار پیش‌فرض: کاربر عادی
+const role = ref("user");
 
 const showPassword = ref(false);
 const showConfirmPassword = ref(false);
@@ -172,38 +172,24 @@ const register = async () => {
         email: email.value,
         phone: phone.value,
         password: password.value,
-        role: role.value, // ارسال نقش به بک‌اند
+        role: role.value,
       }
     );
 
-<<<<<<< HEAD
-    alert("ثبت نام با موفقیت انجام شد.");
-=======
     toast.success("ثبت نام با موفقیت انجام شد.", {
-       timeout: 3000,
+      timeout: 3000,
     });
-
->>>>>>> e808297a8431d55d36623f6e02228f5715a5d3cb
     router.push("/login");
   } catch (err: any) {
-    alert(
+    toast.error(
       err.response?.data?.detail ??
-      "خطا در ثبت نام"
+      "خطا در ثبت نام",
+      {
+        timeout: 3000,
+      }
     );
   }
-<<<<<<< HEAD
 };
-=======
-  toast.error(
-  err.response?.data?.detail ??
-  "خطا در ثبت نام",
-  {
-    timeout: 3000,
-  }
-);
-
-}
->>>>>>> e808297a8431d55d36623f6e02228f5715a5d3cb
 </script>
 
 <style scoped>
@@ -215,32 +201,14 @@ const register = async () => {
   direction: rtl;
 }
 
-<<<<<<< HEAD
 .login-card {
   width: 100%;
   max-width: 450px;
   background: white;
   padding: 35px;
+  box-sizing: border-box;
   border-radius: 18px;
   box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
-=======
-.login-card{
-
-width:100%;
-
-max-width:450px;
-
-background:white;
-
-padding:35px;
-
-box-sizing:border-box;
-
-border-radius:18px;
-
-box-shadow:0 15px 40px rgba(0,0,0,.08);
-
->>>>>>> e808297a8431d55d36623f6e02228f5715a5d3cb
 }
 
 h1 {
@@ -265,32 +233,14 @@ label {
   font-weight: bold;
 }
 
-<<<<<<< HEAD
 input {
   width: 100%;
   padding: 13px;
+  box-sizing: border-box;
   border: 1px solid #d5d5d5;
   border-radius: 10px;
   font-size: 15px;
   transition: 0.25s;
-=======
-input{
-
-width:100%;
-
-padding:13px;
-
-box-sizing:border-box;
-
-border:1px solid #d5d5d5;
-
-border-radius:10px;
-
-font-size:15px;
-
-transition:.25s;
-
->>>>>>> e808297a8431d55d36623f6e02228f5715a5d3cb
 }
 
 input:focus {
@@ -390,8 +340,7 @@ input:focus {
   color: #2563eb;
 }
 
-<<<<<<< HEAD
-/* ===== استایل‌های جدید برای انتخاب نقش ===== */
+
 .role-group {
   margin-top: 6px;
 }
@@ -422,106 +371,56 @@ input:focus {
 .role-option span {
   user-select: none;
 }
-=======
-/* ---------- Responsive ---------- */
 
-@media (max-width:768px){
-
-.login-page{
-
-padding:30px 15px;
-
-align-items:flex-start;
-
+@media (max-width: 768px) {
+  .login-page {
+    padding: 30px 15px;
+    align-items: flex-start;
+  }
+  .login-card {
+    padding: 25px 20px;
+    border-radius: 15px;
+  }
+  h1 {
+    font-size: 26px;
+  }
+  .subtitle {
+    font-size: 14px;
+    margin-bottom: 25px;
+  }
+  .login-btn {
+    padding: 13px;
+    font-size: 15px;
+  }
+  .register-link {
+    font-size: 14px;
+  }
 }
 
-.login-card{
-
-padding:25px 20px;
-
-border-radius:15px;
-
+@media (max-width: 480px) {
+  .login-page {
+    padding: 20px 10px;
+  }
+  .login-card {
+    padding: 18px 15px;
+  }
+  h1 {
+    font-size: 22px;
+  }
+  label {
+    
+     font-size: 14px;
+  }
+  input {
+    padding: 12px;
+    font-size: 14px;
+  }
+  .toggle {
+    font-size: 16px;
+    left: 8px;
+  }
+  .login-btn {
+    font-size: 14px;
+  }
 }
-
-h1{
-
-font-size:26px;
-
-}
-
-.subtitle{
-
-font-size:14px;
-
-margin-bottom:25px;
-
-}
-
-.login-btn{
-
-padding:13px;
-
-font-size:15px;
-
-}
-
-.register-link{
-
-font-size:14px;
-
-}
-
-}
-
-@media (max-width:480px){
-
-.login-page{
-
-padding:20px 10px;
-
-}
-
-.login-card{
-
-padding:18px 15px;
-
-}
-
-h1{
-
-font-size:22px;
-
-}
-
-label{
-
-font-size:14px;
-
-}
-
-input{
-
-padding:12px;
-
-font-size:14px;
-
-}
-
-.toggle{
-
-font-size:16px;
-
-left:8px;
-
-}
-
-.login-btn{
-
-font-size:14px;
-
-}
-
-}
-
->>>>>>> e808297a8431d55d36623f6e02228f5715a5d3cb
 </style>
